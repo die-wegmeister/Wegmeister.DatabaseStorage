@@ -1,0 +1,19 @@
+{
+    "name": "wegmeister/databasestorage",
+    "type": "neos-plugin",
+    "description": "This package adds the ability to store inputs of a form (or other input) into database and export the stored data as xlsx.",
+    "require": {
+        "neos/flow": "*",
+        "phpoffice/phpspreadsheet": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wegmeister\\DatabaseStorage\\": "Classes/"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Wegmeister.DatabaseStorage"
+        }
+    }
+}

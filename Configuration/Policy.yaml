@@ -1,0 +1,35 @@
+privilegeTargets:
+  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+    'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer':
+      matcher: 'method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(index)Action())'
+  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+    'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter':
+      matcher: 'method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(export)Action())'
+
+
+roles:
+  'Wegmeister.DatabaseStorage:DatabaseStorageViewer':
+    privileges:
+      -
+        privilegeTarget:
+          'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
+        permission: GRANT
+
+  'Wegmeister.DatabaseStorage:DatabaseStorageExporter':
+    privileges:
+      -
+        privilegeTarget:
+          'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
+        permission: GRANT
+
+  'Neos.Neos:Administrator':
+    privileges:
+      -
+        privilegeTarget:
+          'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
+        permission: GRANT
+
+      -
+        privilegeTarget:
+          'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
+        permission: GRANT

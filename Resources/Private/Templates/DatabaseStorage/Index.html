@@ -1,0 +1,44 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="Default" />
+
+<f:section name="Title">Database Storage</f:section>
+
+<f:section name="Content">
+  <style>
+    .size-sm {width: 110px;}
+    .neos.neos-module table.neos-table tr td,
+    .neos.neos-module table.neos-table tr td:first-child{padding: 0 !important;}
+    .neos .full-width-left {text-align: left; width: 100%;}
+    .neos.neos-module table.neos-table tr td.with-indicator {padding: 14px 16px !important;}
+  </style>
+
+  <div class="neos-row-fluid">
+    <f:if condition="{identifiers -> f:count()}">
+      <f:then>
+        <table class="neos-table">
+          <thead>
+            <tr>
+              <th>Identifier</th>
+              <th class="size-sm">&nbsp;</th>
+            </tr>
+          </thead>
+          <f:for each="{identifiers}" key="index" as="identifier">
+            <tr>
+              <td title="{identifier}">{identifier}</td>
+              <td class="neos-action size-sm">
+                <div class="neos-pull-right">
+                  <f:link.action action="export" arguments="{identifier: identifier}" class="neos-button neos-button-primary" title="Export entries of '{identifier}'">
+                    <i class="icon-eye-open icon-white"></i>
+                  </f:link.action>
+                </div>
+              </td>
+            </tr>
+          </f:for>
+        </table>
+      </f:then>
+      <f:else>
+        <p>No entries yet.</p>
+      </f:else>
+    </f:if>
+  </div>
+</f:section>
