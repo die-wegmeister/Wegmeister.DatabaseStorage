@@ -1,4 +1,11 @@
 Neos:
+  Form:
+    presets:
+      default:
+        finisherPresets:
+          'Wegmeister.DatabaseStorage:DatabaseStorageFinisher':
+            implementationClassName: WM\StarterKit\Finishers\DatabaseStorageFinisher
+            options: {  }
   Neos:
     modules:
       databaseStorage:
