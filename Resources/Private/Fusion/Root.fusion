@@ -1,0 +1,7 @@
+prototype(RadKultur.Website:DatabaseStorageFinisher.Definition) < prototype(Neos.Form.Builder:Finisher.Definition) {
+    formElementType = 'Wegmeister.DatabaseStorage:DatabaseStorageFinisher'
+
+    options {
+        identifier = ${null}
+    }
+}

@@ -7,6 +7,9 @@ Neos:
             implementationClassName: WM\StarterKit\Finishers\DatabaseStorageFinisher
             options: {  }
   Neos:
+    fusion:
+      autoInclude:
+        'Wegmeister.DatabaseStorage': true
     modules:
       databaseStorage:
         label: 'Database storage'
