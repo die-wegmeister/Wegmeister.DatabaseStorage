@@ -2,7 +2,6 @@ privilegeTargets:
   'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
     'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer':
       matcher: 'method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(index)Action())'
-  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
     'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter':
       matcher: 'method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(export)Action())'
 
