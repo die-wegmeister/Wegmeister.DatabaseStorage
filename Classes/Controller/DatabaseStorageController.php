@@ -41,7 +41,7 @@ class DatabaseStorageController extends ActionController
         ],
         'Csv' => [
             'extension' => 'csv',
-            'mimeType'  => '',
+            'mimeType'  => 'text/csv',
         ],
         'Html' => [
             'extension' => 'html',
