@@ -2,12 +2,24 @@
 
 This package adds the ability to store values of a form (or other input) into database and export the stored data as xlsx.
 
-To add it as a form finisher you have two options:
+## Installation
+
+To install the package simply run
+
+```
+composer require wegmeister/databasestorage
+```
+
+## Usage
+
+> :exclamation: The DatabaseStorage stores your data as JSON. Therefore only the Labels of the first entry can be used for the headline/export. Keep that in mind and try to avoid changing your forms later on. Whenever you add a now field **after** someone already entered some data, the new field would not exist in the headline row of the exported table :exclamation:
+
+You can add the DatabaseStorage Finisher in two ways:
 
 
-## Use DatabaseStorage in an `old fashioned` yaml definition
+### Add DatabaseStorage using yaml definitions
 
-Add the DatabaseStorage a finisher in your form definition/yaml file.
+Add the DatabaseStorage a finisher in your form definition/yaml file:
 
 ```yaml
 type: 'Neos.Form:Form'
@@ -26,7 +38,7 @@ finishers:
 ```
 
 
-## Use DatabaseStorage with the new Neos Form-Builder
+## Add DatabaseStorage using the new Neos Form-Builder
 
 You can also use the DatabseStorage with the new [Neos.Form.Builder](https://github.com/neos/form-builder). 
 You should be able to simply add DatabaseStorage as a finisher to your formular. 
