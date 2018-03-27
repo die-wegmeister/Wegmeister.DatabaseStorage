@@ -1,6 +1,7 @@
 {
     "name": "wegmeister/databasestorage",
     "type": "neos-plugin",
+    "license": ["GPL-3.0-or-later"],
     "description": "This package adds the ability to store inputs of a form (or other input) into database and export the stored data as xlsx.",
     "require": {
         "neos/flow": "*",
