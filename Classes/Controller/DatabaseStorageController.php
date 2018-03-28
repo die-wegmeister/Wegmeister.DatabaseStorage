@@ -68,6 +68,31 @@ class DatabaseStorageController extends ActionController
 
 
     /**
+     * Delete all entries for the given identifier.
+     *
+     * @param string $identifier
+     * @param bool $redirect
+     * @return void
+     */
+    public function deleteAction(string $identifier, $redirect = false)
+    {
+        $count = 0;
+        foreach ($this->databaseStorageRepository->findByStorageidentifier($identifier) as $entry) {
+            $this->databaseStorageRepository->remove($entry);
+            $count++;
+        }
+
+        $this->view->assign('identifier', $identifier);
+        $this->view->assign('count', $count);
+
+        if ($redirect) {
+            $this->addFlashMessage('Teilnehmer erfolgreich entfernt.');
+            $this->redirect('index');
+        }
+    }
+
+
+    /**
      * Export all entries for a specific identifier as xls.
      *
      * @param string $identifier
