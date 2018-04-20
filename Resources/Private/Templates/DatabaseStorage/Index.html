@@ -47,7 +47,7 @@
                       </div>
                       <div class="neos-modal-footer">
                         <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
-                        <f:form action="delete" arguments="{identifier: identifier}" class="neos-inline">
+                        <f:form action="deleteAll" arguments="{identifier: identifier}" class="neos-inline">
                           <f:form.hidden name="redirect" value="1" />
                           <button type="submit" class="neos-button neos-button-danger" title="Delete entries">
                             Yes, delete all entries for identifier "{identifier}"

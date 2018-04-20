@@ -74,7 +74,7 @@ class DatabaseStorageController extends ActionController
      * @param bool $redirect
      * @return void
      */
-    public function deleteAction(string $identifier, $redirect = false)
+    public function deleteAllAction(string $identifier, $redirect = false)
     {
         $count = 0;
         foreach ($this->databaseStorageRepository->findByStorageidentifier($identifier) as $entry) {
