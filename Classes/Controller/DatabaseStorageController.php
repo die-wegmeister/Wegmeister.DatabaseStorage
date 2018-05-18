@@ -55,6 +55,22 @@ class DatabaseStorageController extends ActionController
      */
     protected $databaseStorageRepository;
 
+    /**
+     * @var array
+     */
+    protected $settings;
+
+
+    /**
+     * Inject the settings
+     *
+     * @param array $settings
+     * @return void
+     */
+    public function injectSettings(array $settings)
+    {
+        $this->settings = $settings;
+    }
 
     /**
      * Show list of identifiers
@@ -113,12 +129,12 @@ class DatabaseStorageController extends ActionController
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getProperties()
-            ->setCreator('die wegmeister gmbh')
-            ->setTitle('Database Export')
-            ->setSubject('Database Export');
+            ->setCreator($this->settings['creator'])
+            ->setTitle($this->settings['title'])
+            ->setSubject($this->settings['subject']);
 
         $spreadsheet->setActiveSheetIndex(0);
-        $spreadsheet->getActiveSheet()->setTitle('Database-Export');
+        $spreadsheet->getActiveSheet()->setTitle($this->settings['title']);
 
         $titles = [];
         $columns = 0;

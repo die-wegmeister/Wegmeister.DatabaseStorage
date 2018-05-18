@@ -17,3 +17,9 @@ Neos:
         description: 'List database storage entries'
         icon: icon-database
         privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
+
+Wegmeister:
+  DatabaseStorage:
+    creator: 'die wegmeister gmbh'
+    title: 'Database Export'
+    subject: 'Database Export'
