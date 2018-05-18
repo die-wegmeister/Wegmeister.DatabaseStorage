@@ -1,6 +1,6 @@
 # Wegmeister.DatabaseStorage
 
-This package adds the ability to store values of a form (or other input) into database and export the stored data as xlsx.
+This package adds the ability to store values of a form (or other input) into database and export the stored data as xlsx, xls, ods, csv or html.
 
 ## Installation
 
@@ -40,7 +40,14 @@ finishers:
 
 ## Add DatabaseStorage using the new Neos Form-Builder
 
-You can also use the DatabseStorage with the new [Neos.Form.Builder](https://github.com/neos/form-builder). 
-You should be able to simply add DatabaseStorage as a finisher to your formular. 
+You can also use the DatabseStorage with the new [Neos.Form.Builder](https://github.com/neos/form-builder).
+You should be able to simply add DatabaseStorage as a finisher to your formular.
 
 Don't forget to set an (unique) `identifier`!
+
+
+## ToDos
+
+[ ] Add translations
+[ ] Update package to work with Neos 4.0
+[ ] Add the ability to remove a single entry
