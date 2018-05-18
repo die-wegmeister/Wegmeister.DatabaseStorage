@@ -147,7 +147,7 @@ class DatabaseStorageController extends ActionController
         $prefixKey = '';
         for ($i = 0; $i < $columns; $i++) {
             $index = $i % 26;
-            $columnStyle = $spreadsheet->getActiveSheet()->getStyle($prefixKey . chr(65 + $i) . '1');
+            $columnStyle = $spreadsheet->getActiveSheet()->getStyle($prefixKey . chr(65 + $index) . '1');
             $columnStyle->getFont()->setBold(true);
             $columnStyle->getAlignment()
                 ->setHorizontal(Alignment::HORIZONTAL_CENTER)
