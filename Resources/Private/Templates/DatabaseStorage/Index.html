@@ -27,9 +27,33 @@
               <td title="{identifier}">{identifier}</td>
               <td class="neos-action size-sm">
                 <div class="neos-pull-right">
-                  <f:link.action action="export" arguments="{identifier: identifier}" class="neos-button neos-button-primary" title="Export entries of '{identifier}'">
+                  <button class="neos-button neos-button-primary" title="Export entries of '{identifier}'" data-toggle="modal" href="#export-{identifier}">
                     <i class="icon-eye-open icon-white"></i>
-                  </f:link.action>
+                  </button>
+                  <div class="neos-hide" id="export-{identifier}">
+                    <div class="neos-modal">
+                      <div class="neos-modal-header">
+                        <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
+                        <div class="neos-header">Please select the file type for the export</div>
+                        <div>
+                          <div class="neos-subheader">
+                            <p>This will export all entries for identifier "{identifier}" to a file of the selected output format.</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="neos-modal-footer">
+                        <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
+                        <f:form action="export" arguments="{identifier: identifier}" class="neos-inline">
+                          Export as:
+                          <f:form.button type="submit" name="writerType" value="Xlsx" class="neos-button neos-button-primary" title="Export as xlsx">XLSX</f:form.button>
+                          <f:form.button type="submit" name="writerType" value="Xls" class="neos-button" title="Export as xls">XLS</f:form.button>
+                          <f:form.button type="submit" name="writerType" value="Ods" class="neos-button" title="Export as ods">ODS</f:form.button>
+                          <f:form.button type="submit" name="writerType" value="Csv" class="neos-button" title="Export as csv">CSV</f:form.button>
+                          <f:form.button type="submit" name="writerType" value="Html" class="neos-button" title="Export as html">HTML</f:form.button>
+                        </f:form>
+                      </div>
+                    </div>
+                  </div>
 
                   <button class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'clickToDelete', value: 'Click to delete', package: 'Neos.Neos')}" data-toggle="modal" href="#identifier-{identifier}">
                     <i class="icon-trash icon-white"></i>
