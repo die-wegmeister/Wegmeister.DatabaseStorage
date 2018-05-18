@@ -48,6 +48,7 @@ Don't forget to set an (unique) `identifier`!
 
 ## ToDos
 
-[ ] Add translations
-[ ] Update package to work with Neos 4.0
-[ ] Add the ability to remove a single entry
+- [ ] Add translations
+- [ ] Add the ability to remove a single entry
+- [ ] Fix missing icons in Neos 4.0
+- [x] Update package to work with Neos 4.0
