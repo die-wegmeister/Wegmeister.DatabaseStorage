@@ -6,8 +6,6 @@
 <f:section name="Content">
   <style>
     .size-sm {width: 110px;}
-    .neos.neos-module table.neos-table tr td,
-    .neos.neos-module table.neos-table tr td:first-child{padding: 0 !important;}
     .neos .full-width-left {text-align: left; width: 100%;}
     .neos.neos-module table.neos-table tr td.with-indicator {padding: 14px 16px !important;}
   </style>
@@ -28,7 +26,7 @@
               <td class="neos-action size-sm">
                 <div class="neos-pull-right">
                   <button class="neos-button neos-button-primary" title="Export entries of '{identifier}'" data-toggle="modal" href="#export-{identifier}">
-                    <i class="icon-eye-open icon-white"></i>
+                    <i class="fas fa-eye icon-white"></i>
                   </button>
                   <div class="neos-hide" id="export-{identifier}">
                     <div class="neos-modal">
@@ -56,7 +54,7 @@
                   </div>
 
                   <button class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'clickToDelete', value: 'Click to delete', package: 'Neos.Neos')}" data-toggle="modal" href="#identifier-{identifier}">
-                    <i class="icon-trash icon-white"></i>
+                    <i class="fas fa-trash-alt icon-white"></i>
                   </button>
                   <div class="neos-hide" id="identifier-{identifier}">
                     <div class="neos-modal">
