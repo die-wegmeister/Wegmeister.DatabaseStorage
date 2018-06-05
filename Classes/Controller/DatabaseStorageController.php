@@ -7,6 +7,8 @@ namespace Wegmeister\DatabaseStorage\Controller;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Flow\ResourceManagement\ResourceManager;
+use Neos\Flow\ResourceManagement\PersistentResource;
 
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
 
@@ -54,6 +56,12 @@ class DatabaseStorageController extends ActionController
      * @var DatabaseStorageRepository
      */
     protected $databaseStorageRepository;
+
+    /**
+     * @Flow\Inject
+     * @var ResourceManager
+     */
+    protected $resourceManager;
 
     /**
      * @var array
@@ -150,7 +158,13 @@ class DatabaseStorageController extends ActionController
             $values = [];
 
             foreach ($entry->getProperties() as $value) {
-                $values[] = $value;
+                if ($value instanceof PersistentResource) {
+                    $values[] = $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
+                } elseif (is_string($value)) {
+                    $values[] = $value;
+                } elseif (is_object($value) && method_exists($value, '__toString')) {
+                    $values[] = (string)$value;
+                }
             }
 
             $dataArray[] = $values;
