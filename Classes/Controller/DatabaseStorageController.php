@@ -163,7 +163,7 @@ class DatabaseStorageController extends ActionController
                 } elseif (is_string($value)) {
                     $values[] = $value;
                 } elseif (is_object($value) && method_exists($value, '__toString')) {
-                    $values[] = (string)$value;
+                    $values[] = (string)$value;
                 }
             }
 
