@@ -4,7 +4,7 @@ Neos:
       default:
         finisherPresets:
           'Wegmeister.DatabaseStorage:DatabaseStorageFinisher':
-            implementationClassName: WM\StarterKit\Finishers\DatabaseStorageFinisher
+            implementationClassName: Wegmeister\DatabaseStorage\Finishers\DatabaseStorageFinisher
             options: {  }
   Neos:
     fusion:
