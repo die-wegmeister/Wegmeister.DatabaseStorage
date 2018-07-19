@@ -18,5 +18,8 @@
     group: 'form.finisher'
   properties:
     'identifier':
+      ui:
+        inspector:
+          group: 'finisher'
       validation:
         'Neos.Neos/Validation/NotEmptyValidator': {  }
