@@ -28,6 +28,10 @@
                   <button class="neos-button neos-button-primary" title="Export entries of '{identifier}'" data-toggle="modal" href="#export-{identifier}">
                     <i class="fas fa-eye icon-eye icon-white"></i>
                   </button>
+                  <button class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'clickToDelete', value: 'Click to delete', package: 'Neos.Neos')}" data-toggle="modal" href="#identifier-{identifier}">
+                    <i class="fas fa-trash-alt icon-trash-o icon-white"></i>
+                  </button>
+
                   <div class="neos-hide" id="export-{identifier}">
                     <div class="neos-modal">
                       <div class="neos-modal-header">
@@ -53,9 +57,6 @@
                     </div>
                   </div>
 
-                  <button class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'clickToDelete', value: 'Click to delete', package: 'Neos.Neos')}" data-toggle="modal" href="#identifier-{identifier}">
-                    <i class="fas fa-trash-alt icon-trash-o icon-white"></i>
-                  </button>
                   <div class="neos-hide" id="identifier-{identifier}">
                     <div class="neos-modal">
                       <div class="neos-modal-header">
