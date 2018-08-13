@@ -38,12 +38,31 @@ finishers:
 ```
 
 
-## Add DatabaseStorage using the new Neos Form-Builder
+### Add DatabaseStorage using the new Neos Form-Builder
 
 You can also use the DatabseStorage with the new [Neos.Form.Builder](https://github.com/neos/form-builder).
 You should be able to simply add DatabaseStorage as a finisher to your formular.
 
 Don't forget to set an (unique) `identifier`!
+
+
+## Available settings
+
+The following settings are available and can be overridden by your Settings.yaml:
+
+```yaml
+
+Wegmeister:
+  DatabaseStorage:
+  	# Creator name of the exported files
+    creator: 'die wegmeister gmbh'
+    # Title for the exported files
+    title: 'Database Export'
+    # Subject for the exported files
+    subject: 'Database Export'
+    # DateTime format if the datetime is included in the export
+    datetimeFormat: 'Y-m-d H:i:s'
+```
 
 
 ## ToDos
