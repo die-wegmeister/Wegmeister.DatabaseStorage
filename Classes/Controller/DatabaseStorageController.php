@@ -1,9 +1,18 @@
 <?php
-namespace Wegmeister\DatabaseStorage\Controller;
-
 /**
- * This file is part of the RadKultur.Wettbewerb package.
+ * This file controls the backend of the database storage.
+ *
+ * This file is part of the Flow Framework Package "Wegmeister.DatabaseStorage".
+ *
+ * PHP version 7
+ *
+ * @category Controller
+ * @package  Wegmeister\DatabaseStorage
+ * @author   Benjamin Klix <benjamin.klix@die-wegmeister.com>
+ * @license  https://github.com/die-wegmeister/Wegmeister.DatabaseStorage/blob/master/LICENSE GPL-3.0-or-later
+ * @link     https://github.com/die-wegmeister/Wegmeister.DatabaseStorage
  */
+namespace Wegmeister\DatabaseStorage\Controller;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
@@ -26,6 +35,7 @@ class DatabaseStorageController extends ActionController
 {
     /**
      * Array with extension and mime type for spreadsheet writers.
+     *
      * @var array
      */
     protected static $types = [
@@ -52,18 +62,24 @@ class DatabaseStorageController extends ActionController
     ];
 
     /**
+     * Instance of the database storage repository.
+     *
      * @Flow\Inject
      * @var DatabaseStorageRepository
      */
     protected $databaseStorageRepository;
 
     /**
+     * Instance of the resource manager.
+     *
      * @Flow\Inject
      * @var ResourceManager
      */
     protected $resourceManager;
 
     /**
+     * Settings of this plugin.
+     *
      * @var array
      */
     protected $settings;
@@ -72,7 +88,8 @@ class DatabaseStorageController extends ActionController
     /**
      * Inject the settings
      *
-     * @param array $settings
+     * @param array $settings The settings to inject.
+     *
      * @return void
      */
     public function injectSettings(array $settings)
@@ -94,11 +111,12 @@ class DatabaseStorageController extends ActionController
     /**
      * Delete all entries for the given identifier.
      *
-     * @param string $identifier
-     * @param bool $redirect
+     * @param string $identifier The storage identifier for the entries to be removed.
+     * @param bool $redirect     Redirect to index?
+     *
      * @return void
      */
-    public function deleteAllAction(string $identifier, $redirect = false)
+    public function deleteAllAction(string $identifier, bool $redirect = false)
     {
         $count = 0;
         foreach ($this->databaseStorageRepository->findByStorageidentifier($identifier) as $entry) {
@@ -110,6 +128,7 @@ class DatabaseStorageController extends ActionController
         $this->view->assign('count', $count);
 
         if ($redirect) {
+            // TODO: Translate flash message.
             $this->addFlashMessage('Teilnehmer erfolgreich entfernt.');
             $this->redirect('index');
         }
@@ -119,8 +138,8 @@ class DatabaseStorageController extends ActionController
     /**
      * Export all entries for a specific identifier as xls.
      *
-     * @param string $identifier
-     * @param string $writerType
+     * @param string $identifier     The storage identifier that should be exported.
+     * @param string $writerType     The writer type/export format to be used.
      *
      * @return void
      */

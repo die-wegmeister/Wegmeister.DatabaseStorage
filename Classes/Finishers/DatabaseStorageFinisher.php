@@ -1,15 +1,18 @@
 <?php
-namespace Wegmeister\DatabaseStorage\Finishers;
-
 /**
- * This script belongs to the Neos Flow package "Wegmeister.DatabaseStorage".
+ * The form finisher for the database storage.
  *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License, either version 3
- * of the License, or (at your option) any later version.
+ * This file is part of the Flow Framework Package "Wegmeister.DatabaseStorage".
  *
- * The Neos project - inspiring people to share!
+ * PHP version 7
+ *
+ * @category Finisher
+ * @package  Wegmeister\DatabaseStorage
+ * @author   Benjamin Klix <benjamin.klix@die-wegmeister.com>
+ * @license  https://github.com/die-wegmeister/Wegmeister.DatabaseStorage/blob/master/LICENSE GPL-3.0-or-later
+ * @link     https://github.com/die-wegmeister/Wegmeister.DatabaseStorage
  */
+namespace Wegmeister\DatabaseStorage\Finishers;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Form\Core\Model\AbstractFinisher;
@@ -23,8 +26,9 @@ use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
  */
 class DatabaseStorageFinisher extends AbstractFinisher
 {
-
     /**
+     * Instance of the database storage repository.
+     *
      * @Flow\Inject
      * @var DatabaseStorageRepository
      */
@@ -32,6 +36,7 @@ class DatabaseStorageFinisher extends AbstractFinisher
 
     /**
      * Executes this finisher
+     *
      * @see AbstractFinisher::execute()
      *
      * @return void

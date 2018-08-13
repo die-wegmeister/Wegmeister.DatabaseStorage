@@ -1,9 +1,18 @@
 <?php
-namespace Wegmeister\DatabaseStorage\Domain\Model;
-
 /**
- * This file is part of the Wegmeister.DatabaseStorage package.
+ * The model for a database storage entry.
+ *
+ * This file is part of the Flow Framework Package "Wegmeister.DatabaseStorage".
+ *
+ * PHP version 7
+ *
+ * @category Model
+ * @package  Wegmeister\DatabaseStorage
+ * @author   Benjamin Klix <benjamin.klix@die-wegmeister.com>
+ * @license  https://github.com/die-wegmeister/Wegmeister.DatabaseStorage/blob/master/LICENSE GPL-3.0-or-later
+ * @link     https://github.com/die-wegmeister/Wegmeister.DatabaseStorage
  */
+namespace Wegmeister\DatabaseStorage\Domain\Model;
 
 use Neos\Flow\Annotations as Flow;
 use Doctrine\ORM\Mapping as ORM;
@@ -15,6 +24,8 @@ class DatabaseStorage
 {
 
     /**
+     * The storage identifier of the entry.
+     *
      * @var string
      * @Flow\Validate(type="NotEmpty")
      * @ORM\Column(length=256)
@@ -31,6 +42,8 @@ class DatabaseStorage
     protected $properties = [];
 
     /**
+     * DateTime the entry was created.
+     *
      * @var \DateTime
      * @Flow\Validate(type="NotEmpty")
      */
@@ -48,7 +61,9 @@ class DatabaseStorage
 
     /**
      * Set the identifier
-     * @param string $identifier
+     *
+     * @param string $identifier The identifier for the entry.
+     *
      * @return DatabaseStorage
      */
     public function setStorageidentifier(string $identifier)
@@ -59,6 +74,7 @@ class DatabaseStorage
 
     /**
      * Get properties
+     *
      * @return array
      */
     public function getProperties()
@@ -68,7 +84,9 @@ class DatabaseStorage
 
     /**
      * Set properties
-     * @param array $properties
+     *
+     * @param array $properties Array of the properties.
+     *
      * @return DatabaseStorage
      */
     public function setProperties(array $properties)
@@ -89,7 +107,9 @@ class DatabaseStorage
 
     /**
      * Set datetime
+     *
      * @param \DateTime $datetime
+     *
      * @return DatabaseStorage
      */
     public function setDateTime(\DateTime $datetime)

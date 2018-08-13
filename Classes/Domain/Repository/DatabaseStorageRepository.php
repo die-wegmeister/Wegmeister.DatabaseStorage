@@ -1,9 +1,18 @@
 <?php
-namespace Wegmeister\DatabaseStorage\Domain\Repository;
-
 /**
- * This file is part of the Wegmeister.DatabaseStorage package.
+ * Repository to load database storage entries.
+ *
+ * This file is part of the Flow Framework Package "Wegmeister.DatabaseStorage".
+ *
+ * PHP version 7
+ *
+ * @category Repository
+ * @package  Wegmeister\DatabaseStorage
+ * @author   Benjamin Klix <benjamin.klix@die-wegmeister.com>
+ * @license  https://github.com/die-wegmeister/Wegmeister.DatabaseStorage/blob/master/LICENSE GPL-3.0-or-later
+ * @link     https://github.com/die-wegmeister/Wegmeister.DatabaseStorage
  */
+namespace Wegmeister\DatabaseStorage\Domain\Repository;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Repository;
@@ -16,6 +25,8 @@ class DatabaseStorageRepository extends Repository
 {
 
     /**
+     * Update default orderings.
+     *
      * @var array
      */
     protected $defaultOrderings = [
@@ -24,11 +35,15 @@ class DatabaseStorageRepository extends Repository
     ];
 
     /**
+     * Currently used storage identifier.
+     *
      * @var string
      */
     protected $currentIdentifier = false;
 
     /**
+     * List of identifiers.
+     *
      * @var array
      */
     protected $identifiers = [];
