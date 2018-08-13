@@ -140,10 +140,11 @@ class DatabaseStorageController extends ActionController
      *
      * @param string $identifier     The storage identifier that should be exported.
      * @param string $writerType     The writer type/export format to be used.
+     * @param bool   $exportDateTime Should the datetime be exported?
      *
      * @return void
      */
-    public function exportAction(string $identifier, $writerType = 'Xlsx')
+    public function exportAction(string $identifier, string $writerType = 'Xlsx', bool $exportDateTime = false)
     {
         if (!isset(self::$types[$writerType])) {
             throw new WriterException('No writer available for type ' . $writerType . '.', 1521787983);
@@ -169,6 +170,10 @@ class DatabaseStorageController extends ActionController
             $titles[] = $title;
             $columns++;
         }
+        if ($exportDateTime) {
+            // TODO: Translate title for datetime
+            $titles[] = 'DateTime';
+        }
 
         $dataArray[] = $titles;
 
@@ -185,6 +190,8 @@ class DatabaseStorageController extends ActionController
                     $values[] = (string)$value;
                 }
             }
+
+            $values[] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
 
             $dataArray[] = $values;
         }
