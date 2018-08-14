@@ -63,11 +63,3 @@ Wegmeister:
     # DateTime format if the datetime is included in the export
     datetimeFormat: 'Y-m-d H:i:s'
 ```
-
-
-## ToDos
-
-- [ ] Add translations
-- [ ] Add the ability to remove a single entry
-- [x] Fix missing icons in Neos 4.0
-- [x] Update package to work with Neos 4.0
