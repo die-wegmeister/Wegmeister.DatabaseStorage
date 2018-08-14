@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file original="" source-language="en" target-language="de" datatype="plaintext">
+		<body>
+			<!-- General translations -->
+			<trans-unit id="storage.databaseStorage" xml:space="preserve">
+				<source>Database Storage</source>
+				<target>Datenbank-Speicher</target>
+			</trans-unit>
+			<trans-unit id="storage.databaseStorageDescription" xml:space="preserve">
+				<source>List database storage entries</source>
+				<target>Zeige Einträge des Datenbank-Speichers</target>
+			</trans-unit>
+
+			<!-- Index page -->
+			<trans-unit id="storage.identifier" xml:space="preserve">
+				<source>Identifier</source>
+				<target>ID</target>
+			</trans-unit>
+			<trans-unit id="storage.export" xml:space="preserve">
+				<source>Export entries of identifier '{0}'</source>
+				<target>Einträge von ID '{0}' exportieren</target>
+			</trans-unit>
+			<trans-unit id="storage.exportModal.title" xml:space="preserve">
+				<source>Please select the file type for the export</source>
+				<target>Bitte wählen Sie den gewünschten Dateityp für den Export aus</target>
+			</trans-unit>
+			<trans-unit id="storage.exportModal.text" xml:space="preserve">
+				<source>This will export all entries for identifier "{0}" to a file of the selected output format.</source>
+				<target>Hierdurch wird ein Download mit allen Einträgen für die ID "{0}" im gewünschten Dateityp erstellt.</target>
+			</trans-unit>
+			<trans-unit id="storage.includeDatetime" xml:space="preserve">
+				<source>Include datetime in export</source>
+				<target>Datum/Uhrzeit des Eintrags ausgeben</target>
+			</trans-unit>
+			<trans-unit id="storage.exportAs" xml:space="preserve">
+				<source>Export as</source>
+				<target>Exportieren als</target>
+			</trans-unit>
+			<trans-unit id="storage.exportAsFiletype" xml:space="preserve">
+				<source>Export as {0}</source>
+				<target>Als {0} exportieren</target>
+			</trans-unit>
+			<trans-unit id="storage.deleteModal.title" xml:space="preserve">
+				<source>Do you really want to delete all entries of identifier "{0}"?</source>
+				<target>Wollen Sie wirklich alle Einträge der ID "{0}" löschen?</target>
+			</trans-unit>
+			<trans-unit id="storage.deleteModal.text" xml:space="preserve">
+				<source>This will delete all entries for identifier "{0}" and cannot be undone. Your data will be gone!</source>
+				<target>Hierdurch werden alle Einträge der ID "{0}" entgültig gelöscht. Dieser Vorgang kann nicht rückgangig gemacht werden.</target>
+			</trans-unit>
+			<trans-unit id="storage.deleteModal.buttonTitle" xml:space="preserve">
+				<source>Delete entries</source>
+				<target>Einträge löschen</target>
+			</trans-unit>
+			<trans-unit id="storage.deleteModal.buttonText" xml:space="preserve">
+				<source>Yes, delete all entries for identifier "{0}"</source>
+				<target>Ja, alle Einträge für ID "{0}" löschen</target>
+			</trans-unit>
+			<trans-unit id="storage.noEntries" xml:space="preserve">
+				<source>No entries yet.</source>
+				<target>Noch keine Einträge vorhanden.</target>
+			</trans-unit>
+
+			<!-- Delete all page -->
+			<trans-unit id="storage.deleteAll.deleteEntries" xml:space="preserve">
+				<source>Delete entries</source>
+				<target>Einträge löschen</target>
+			</trans-unit>
+			<trans-unit id="storage.deleteAll.successTitle" xml:space="preserve">
+				<source>Entries successfully removed</source>
+				<target>Einträge erfolgreich gelöscht</target>
+			</trans-unit>
+			<trans-unit id="storage.deleteAll.successText" xml:space="preserve">
+				<source>All ({0}) entries for the identifier "{1}" were successfully removed.</source>
+				<target>Alle ({0}) Einträge der ID "{1}" wurden erfolgreich gelöscht.</target>
+			</trans-unit>
+			<trans-unit id="storage.deleteAll.back" xml:space="preserve">
+				<source>Back to overview</source>
+				<target>Zurück zur Übersicht</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

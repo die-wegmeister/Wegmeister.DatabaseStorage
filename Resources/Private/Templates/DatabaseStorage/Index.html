@@ -1,7 +1,7 @@
 {namespace neos=Neos\Neos\ViewHelpers}
 <f:layout name="Default" />
 
-<f:section name="Title">Database Storage</f:section>
+<f:section name="Title">{neos:backend.translate(id: 'storage.databaseStorage')}</f:section>
 
 <f:section name="Content">
   <style>
@@ -16,7 +16,7 @@
         <table class="neos-table">
           <thead>
             <tr>
-              <th>Identifier</th>
+              <th>{neos:backend.translate(id: 'storage.identifier')}</th>
               <th class="size-sm">&nbsp;</th>
             </tr>
           </thead>
@@ -25,7 +25,7 @@
               <td title="{identifier}">{identifier}</td>
               <td class="neos-action size-sm">
                 <div class="neos-pull-right">
-                  <button class="neos-button neos-button-primary" title="Export entries of '{identifier}'" data-toggle="modal" href="#export-{identifier}">
+                  <button class="neos-button neos-button-primary" title="{neos:backend.translate(id: 'storage.export', arguments: {0: identifier})}" data-toggle="modal" href="#export-{identifier}">
                     <i class="fas fa-download icon-download icon-white"></i>
                   </button>
                   <button class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'clickToDelete', value: 'Click to delete', package: 'Neos.Neos')}" data-toggle="modal" href="#identifier-{identifier}">
@@ -36,10 +36,10 @@
                     <div class="neos-modal">
                       <div class="neos-modal-header">
                         <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
-                        <div class="neos-header">Please select the file type for the export</div>
+                        <div class="neos-header">{neos:backend.translate(id: 'storage.exportModal.title')}</div>
                         <div>
                           <div class="neos-subheader">
-                            <p>This will export all entries for identifier "{identifier}" to a file of the selected output format.</p>
+                            <p>{neos:backend.translate(id: 'storage.exportModal.text', arguments: {0: identifier})}</p>
                           </div>
                         </div>
                       </div>
@@ -47,14 +47,14 @@
                         <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
                         <f:form action="export" arguments="{identifier: identifier}" class="neos-inline">
                           <div>
-                            <label class="neos-checkbox"><f:form.checkbox name="exportDateTime" value="1" /><span></span> Include datetime in export</label>
+                            <label class="neos-checkbox"><f:form.checkbox name="exportDateTime" value="1" /><span></span> {neos:backend.translate(id: 'storage.includeDatetime')}</label>
                           </div>
-                          Export as:
-                          <f:form.button type="submit" name="writerType" value="Xlsx" class="neos-button neos-button-primary" title="Export as xlsx">XLSX</f:form.button>
-                          <f:form.button type="submit" name="writerType" value="Xls" class="neos-button" title="Export as xls">XLS</f:form.button>
-                          <f:form.button type="submit" name="writerType" value="Ods" class="neos-button" title="Export as ods">ODS</f:form.button>
-                          <f:form.button type="submit" name="writerType" value="Csv" class="neos-button" title="Export as csv">CSV</f:form.button>
-                          <f:form.button type="submit" name="writerType" value="Html" class="neos-button" title="Export as html">HTML</f:form.button>
+                          {neos:backend.translate(id: 'storage.exportAs')}:
+                          <f:form.button type="submit" name="writerType" value="Xlsx" class="neos-button neos-button-primary" title="{neos:backend.translate(id: 'storage.exportAsFiletype', arguments: {0: 'xlsx'})}">XLSX</f:form.button>
+                          <f:form.button type="submit" name="writerType" value="Xls" class="neos-button" title="{neos:backend.translate(id: 'storage.exportAsFiletype', arguments: {0: 'xls'})}">XLS</f:form.button>
+                          <f:form.button type="submit" name="writerType" value="Ods" class="neos-button" title="{neos:backend.translate(id: 'storage.exportAsFiletype', arguments: {0: 'ods'})}">ODS</f:form.button>
+                          <f:form.button type="submit" name="writerType" value="Csv" class="neos-button" title="{neos:backend.translate(id: 'storage.exportAsFiletype', arguments: {0: 'csv'})}">CSV</f:form.button>
+                          <f:form.button type="submit" name="writerType" value="Html" class="neos-button" title="{neos:backend.translate(id: 'storage.exportAsFiletype', arguments: {0: 'html'})}">HTML</f:form.button>
                         </f:form>
                       </div>
                     </div>
@@ -64,10 +64,10 @@
                     <div class="neos-modal">
                       <div class="neos-modal-header">
                         <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
-                        <div class="neos-header">Do you really want to delete identifier "{identifier}"?</div>
+                        <div class="neos-header">{neos:backend.translate(id: 'storage.deleteModal.title', arguments: {0: identifier})}</div>
                         <div>
                           <div class="neos-subheader">
-                            <p>This will delete all entries for identifier "{identifier}" and cannot be undone. Your data will be gone!</p>
+                            <p>{neos:backend.translate(id: 'storage.deleteModal.text', arguments: {0: identifier})}</p>
                           </div>
                         </div>
                       </div>
@@ -75,8 +75,8 @@
                         <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
                         <f:form action="deleteAll" arguments="{identifier: identifier}" class="neos-inline">
                           <f:form.hidden name="redirect" value="1" />
-                          <button type="submit" class="neos-button neos-button-danger" title="Delete entries">
-                            Yes, delete all entries for identifier "{identifier}"
+                          <button type="submit" class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'storage.deleteModal.buttonTitle')}">
+                            {neos:backend.translate(id: 'storage.deleteModal.buttonTitle', arguments: {0: identifier})}
                           </button>
                         </f:form>
                       </div>
@@ -90,7 +90,7 @@
         </table>
       </f:then>
       <f:else>
-        <p>No entries yet.</p>
+        <p>{neos:backend.translate(id: 'storage.noEntries')}</p>
       </f:else>
     </f:if>
   </div>

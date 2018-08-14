@@ -1,14 +1,14 @@
 {namespace neos=Neos\Neos\ViewHelpers}
 <f:layout name="Default" />
 
-<f:section name="title">Database Storage - Delete entries</f:section>
+<f:section name="title">{neos:backend.translate(id: 'storage.databaseStorage')} - {neos:backend.translate(id: 'storage.deleteAll.deleteEntries')}</f:section>
 
 <f:section name="content">
   <section>
-    <h3>Entries successfully removed</h3>
-    <p>All ({count}) entries for the identifier "{identifier}" were successfully removed.</p>
-    <f:link.action action="index" class="neos-button neos-button-primary" title="Go back to list of identifiers'">
-      <i class="fas fa-list icon-list icon-white"></i> Back to list
+    <h3>{neos:backend.translate(id: 'storage.deleteAll.successTitle')}</h3>
+    <p>{neos:backend.translate(id: 'storage.deleteAll.successTitle', arguments: {0: count, 1: identifier})}</p>
+    <f:link.action action="index" class="neos-button neos-button-primary" title="{neos:backend.translate(id: 'storage.deleteAll.back')}'">
+      <i class="fas fa-list icon-list icon-white"></i> {neos:backend.translate(id: 'storage.deleteAll.back')}
     </f:link.action>
   </section>
 </f:section>

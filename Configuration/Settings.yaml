@@ -12,9 +12,9 @@ Neos:
         'Wegmeister.DatabaseStorage': true
     modules:
       databaseStorage:
-        label: 'Database storage'
+        label: 'Wegmeister.DatabaseStorage:Main:storage.databaseStorage'
         controller: \Wegmeister\DatabaseStorage\Controller\DatabaseStorageController
-        description: 'List database storage entries'
+        description: 'Wegmeister.DatabaseStorage:Main:storage.databaseStorageDescription'
         icon: icon-database
         privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
 
