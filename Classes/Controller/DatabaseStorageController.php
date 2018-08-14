@@ -112,7 +112,7 @@ class DatabaseStorageController extends ActionController
      * Delete all entries for the given identifier.
      *
      * @param string $identifier The storage identifier for the entries to be removed.
-     * @param bool $redirect     Redirect to index?
+     * @param bool   $redirect   Redirect to index?
      *
      * @return void
      */
@@ -231,11 +231,13 @@ class DatabaseStorageController extends ActionController
         header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
         header("Cache-Control: private", false); // required for certain browsers
         header('Content-Type: ' . self::$types[$writerType]['mimeType']);
-        header(sprintf(
-            'Content-Disposition: attachment; filename="Database-Storage-%s.%s"',
-            $identifier,
-            self::$types[$writerType]['extension']
-        ));
+        header(
+            sprintf(
+                'Content-Disposition: attachment; filename="Database-Storage-%s.%s"',
+                $identifier,
+                self::$types[$writerType]['extension']
+            )
+        );
         header("Content-Transfer-Encoding: binary");
 
         $writer = IOFactory::createWriter($spreadsheet, $writerType);
