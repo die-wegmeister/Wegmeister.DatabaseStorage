@@ -173,6 +173,7 @@ class DatabaseStorageController extends ActionController
         if ($exportDateTime) {
             // TODO: Translate title for datetime
             $titles[] = 'DateTime';
+            $columns++;
         }
 
         $dataArray[] = $titles;
