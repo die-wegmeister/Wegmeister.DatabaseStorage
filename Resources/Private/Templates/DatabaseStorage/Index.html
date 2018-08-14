@@ -46,6 +46,9 @@
                       <div class="neos-modal-footer">
                         <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
                         <f:form action="export" arguments="{identifier: identifier}" class="neos-inline">
+                          <div>
+                            <label class="neos-checkbox"><f:form.checkbox name="exportDateTime" value="1" /><span></span> Include datetime in export</label>
+                          </div>
                           Export as:
                           <f:form.button type="submit" name="writerType" value="Xlsx" class="neos-button neos-button-primary" title="Export as xlsx">XLSX</f:form.button>
                           <f:form.button type="submit" name="writerType" value="Xls" class="neos-button" title="Export as xls">XLS</f:form.button>
