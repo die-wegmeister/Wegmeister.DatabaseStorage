@@ -188,6 +188,8 @@ class DatabaseStorageController extends ActionController
                     $values[] = $value;
                 } elseif (is_object($value) && method_exists($value, '__toString')) {
                     $values[] = (string)$value;
+                } else {
+                    $values[] = '-';
                 }
             }
 
@@ -198,7 +200,7 @@ class DatabaseStorageController extends ActionController
 
         $spreadsheet->getActiveSheet()->fromArray($dataArray);
 
-        // TODO: Set headline bold
+        // Set headlines bold
         $prefixIndex = 64;
         $prefixKey = '';
         for ($i = 0; $i < $columns; $i++) {
