@@ -194,7 +194,9 @@ class DatabaseStorageController extends ActionController
                 }
             }
 
-            $values[] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
+            if ($exportDateTime) {
+                $values[] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
+            }
 
             $dataArray[] = $values;
         }
