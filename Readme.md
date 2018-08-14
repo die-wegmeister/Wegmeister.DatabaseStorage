@@ -54,7 +54,7 @@ The following settings are available and can be overridden by your Settings.yaml
 
 Wegmeister:
   DatabaseStorage:
-  	# Creator name of the exported files
+    # Creator name of the exported files
     creator: 'die wegmeister gmbh'
     # Title for the exported files
     title: 'Database Export'
