@@ -18,6 +18,12 @@ Neos:
         icon: icon-database
         privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
 
+    userInterface:
+      translation:
+        autoInclude:
+          'Wegmeister.DatabaseStorage':
+            - 'Main'
+
 Wegmeister:
   DatabaseStorage:
     creator: 'die wegmeister gmbh'
