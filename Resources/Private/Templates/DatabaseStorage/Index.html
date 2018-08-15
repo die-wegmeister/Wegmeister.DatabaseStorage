@@ -5,9 +5,7 @@
 
 <f:section name="Content">
   <style>
-    .size-sm {width: 110px;}
-    .neos .full-width-left {text-align: left; width: 100%;}
-    .neos.neos-module table.neos-table tr td.with-indicator {padding: 14px 16px !important;}
+    .size-sm {width: 150px;}
   </style>
 
   <div class="neos-row-fluid">
@@ -25,6 +23,7 @@
               <td title="{identifier}">{identifier}</td>
               <td class="neos-action size-sm">
                 <div class="neos-pull-right">
+                  <f:link.action action="show" arguments="{identifier: identifier}" class="neos-button"><i class="fas fa-eye icon-eye icon-white"></i></f:link.action>
                   <button class="neos-button neos-button-primary" title="{neos:backend.translate(id: 'storage.export', arguments: {0: identifier})}" data-toggle="modal" href="#export-{identifier}">
                     <i class="fas fa-download icon-download icon-white"></i>
                   </button>
@@ -76,7 +75,7 @@
                         <f:form action="deleteAll" arguments="{identifier: identifier}" class="neos-inline">
                           <f:form.hidden name="redirect" value="1" />
                           <button type="submit" class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'storage.deleteModal.buttonTitle')}">
-                            {neos:backend.translate(id: 'storage.deleteModal.buttonTitle', arguments: {0: identifier})}
+                            {neos:backend.translate(id: 'storage.deleteModal.buttonText', arguments: {0: identifier})}
                           </button>
                         </f:form>
                       </div>

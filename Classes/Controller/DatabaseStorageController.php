@@ -19,6 +19,7 @@ use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Flow\ResourceManagement\PersistentResource;
 
+use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -109,6 +110,63 @@ class DatabaseStorageController extends ActionController
 
 
     /**
+     * List entries of a given storage identifier.
+     *
+     * @param string $identifier The storage identifier.
+     *
+     * @return void
+     */
+    public function showAction(string $identifier)
+    {
+        $entries = $this->databaseStorageRepository->findByStorageidentifier($identifier);
+        $titles = [];
+        if (isset($entries[0])) {
+            foreach ($entries[0]->getProperties() as $title => $value) {
+                $titles[] = $title;
+            }
+            foreach ($entries as $entry) {
+                $properties = $entry->getProperties();
+
+                foreach ($properties as &$value) {
+                    if ($value instanceof PersistentResource) {
+                        $value = $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
+                    } elseif (is_string($value)) {
+                    } elseif (is_object($value) && method_exists($value, '__toString')) {
+                        $value = (string)$value;
+                    } else {
+                        $value = '-';
+                    }
+                }
+
+                $entry->setProperties($properties);
+            }
+            $this->view->assign('identifier', $identifier);
+            $this->view->assign('titles', $titles);
+            $this->view->assign('entries', $entries);
+            $this->view->assign('datetimeFormat', $this->settings['datetimeFormat']);
+        } else {
+            $this->redirect('index');
+        }
+    }
+
+
+    /**
+     * Delete an entry from the list of identifiers.
+     *
+     * @param DatabaseStorage $entry The DatabaseStorage entry
+     *
+     * @return void
+     */
+    public function deleteAction(DatabaseStorage $entry)
+    {
+        $identifier = $entry->getStorageidentifier();
+        $this->databaseStorageRepository->remove($entry);
+        $this->addFlashMessage('Entry successfully removed.');
+        $this->redirect('show', null, null, ['identifier' => $identifier]);
+    }
+
+
+    /**
      * Delete all entries for the given identifier.
      *
      * @param string $identifier The storage identifier for the entries to be removed.
@@ -129,7 +187,7 @@ class DatabaseStorageController extends ActionController
 
         if ($redirect) {
             // TODO: Translate flash message.
-            $this->addFlashMessage('Teilnehmer erfolgreich entfernt.');
+            $this->addFlashMessage('Entries successfully removed.');
             $this->redirect('index');
         }
     }

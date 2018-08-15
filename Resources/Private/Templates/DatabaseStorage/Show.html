@@ -1,0 +1,76 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="Default" />
+
+<f:section name="Title">{neos:backend.translate(id: 'storage.databaseStorage')} - {neos:backend.translate(id: 'storage.entriesForX', arguments: {0: identifier})}</f:section>
+
+<f:section name="Content">
+  <style>
+    .scrollable-table {overflow-x: auto; width: 100%;}
+    .scrollable-table .neos-table {min-width: 100%; max-width: none;}
+    .size-sm {width: 50px;}
+    .neos.neos-module table td,
+    .neos.neos-module table th {line-height: 24px; padding: 8px 16px;}
+  </style>
+
+  <div class="neos-row-fluid">
+    <f:if condition="{entries -> f:count()}">
+      <f:then>
+        <div class="scrollable-table">
+          <table class="neos-table">
+            <thead>
+              <tr>
+                <th class="size-sm"><!-- Actions -->&nbsp;</th>
+                <f:for each="{titles}" as="title">
+                  <th>{title}</th>
+                </f:for>
+                <th>{neos:backend.translate(id: 'storage.datetime')}</th>
+              </tr>
+            </thead>
+            <f:for each="{entries}" key="index" as="entry">
+              <tr>
+                <td class="neos-action size-sm">
+                  <div class="neos-pull-right">
+                    <button class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'clickToDelete', value: 'Click to delete', package: 'Neos.Neos')}" data-toggle="modal" href="#delete-{index}">
+                      <i class="fas fa-trash-alt icon-trash-o icon-white"></i>
+                    </button>
+
+                    <div class="neos-hide" id="delete-{index}">
+                      <div class="neos-modal">
+                        <div class="neos-modal-header">
+                          <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
+                          <div class="neos-header">{neos:backend.translate(id: 'storage.deleteSingleModal.title')}</div>
+                          <div>
+                            <div class="neos-subheader">
+                              <p>{neos:backend.translate(id: 'storage.deleteSingleModal.text')}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="neos-modal-footer">
+                          <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
+                          <f:form action="delete" object="{entry}" objectName="entry" class="neos-inline">
+                            <button type="submit" class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'storage.deleteSingleModal.buttonTitle')}">
+                              {neos:backend.translate(id: 'storage.deleteSingleModal.buttonTitle')}
+                            </button>
+                          </f:form>
+                        </div>
+                      </div>
+                      <div class="neos-modal-backdrop neos-in"></div>
+                    </div>
+                  </div>
+                </td>
+                <f:for each="{entry.properties}" as="property">
+                  <td>{property -> f:format.nl2br()}</td>
+                </f:for>
+                <td>{f:format.date(date: entry.dateTime, format: datetimeFormat)}</td>
+              </tr>
+            </f:for>
+          </table>
+        </div>
+      </f:then>
+      <f:else>
+        <p>{neos:backend.translate(id: 'storage.noEntries')}</p>
+      </f:else>
+    </f:if>
+    <p><f:link.action action="index" class="neos-button">{neos:backend.translate(id: 'storage.backToIdentifiers')}</f:link.action></p>
+  </div>
+</f:section>
