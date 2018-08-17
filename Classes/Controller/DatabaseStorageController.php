@@ -15,6 +15,7 @@
 namespace Wegmeister\DatabaseStorage\Controller;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\I18n\Translator;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Flow\ResourceManagement\PersistentResource;
@@ -77,6 +78,14 @@ class DatabaseStorageController extends ActionController
      * @var ResourceManager
      */
     protected $resourceManager;
+
+    /**
+     * Instance of the translator interface.
+     *
+     * @Flow\Inject
+     * @var Translator
+     */
+    protected $translator;
 
     /**
      * Settings of this plugin.
@@ -161,7 +170,7 @@ class DatabaseStorageController extends ActionController
     {
         $identifier = $entry->getStorageidentifier();
         $this->databaseStorageRepository->remove($entry);
-        $this->addFlashMessage('Entry successfully removed.');
+        $this->addFlashMessage($this->translator->translateById('storage.flashmessage.entryRemoved', [], null, null, 'Main', 'Wegmeister.DatabaseStorage'));
         $this->redirect('show', null, null, ['identifier' => $identifier]);
     }
 
@@ -187,7 +196,7 @@ class DatabaseStorageController extends ActionController
 
         if ($redirect) {
             // TODO: Translate flash message.
-            $this->addFlashMessage('Entries successfully removed.');
+            $this->addFlashMessage($this->translator->translateById('storage.flashmessage.entriesRemoved', [], null, null, 'Main', 'Wegmeister.DatabaseStorage'));
             $this->redirect('index');
         }
     }

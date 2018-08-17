@@ -19,6 +19,14 @@
 				<source>Back to list of identifiers</source>
 			</trans-unit>
 
+			<!-- Flash messages -->
+			<trans-unit id="storage.flashmessage.entryRemoved" xml:space="preserve">
+				<source>Entry successfully removed.</source>
+			</trans-unit>
+			<trans-unit id="storage.flashmessage.entriesRemoved" xml:space="preserve">
+				<source>Entries successfully removed.</source>
+			</trans-unit>
+
 			<!-- Index page -->
 			<trans-unit id="storage.identifier" xml:space="preserve">
 				<source>Identifier</source>

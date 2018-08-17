@@ -24,6 +24,16 @@
 				<target>Zurück zur Liste der vorhandenen IDs</target>
 			</trans-unit>
 
+			<!-- Flash messages -->
+			<trans-unit id="storage.flashmessage.entryRemoved" xml:space="preserve">
+				<source>Entry successfully removed.</source>
+				<target>Eintrag erfolgreich entfernt.</target>
+			</trans-unit>
+			<trans-unit id="storage.flashmessage.entriesRemoved" xml:space="preserve">
+				<source>Entries successfully removed.</source>
+				<target>Einträge erfolgreich entfernt.</target>
+			</trans-unit>
+
 			<!-- Index -->
 			<trans-unit id="storage.identifier" xml:space="preserve">
 				<source>Identifier</source>
