@@ -124,6 +124,7 @@ class DatabaseStorageController extends ActionController
      * @param string $identifier The storage identifier.
      *
      * @return void
+     * @throws \Exception
      */
     public function showAction(string $identifier)
     {
@@ -142,6 +143,8 @@ class DatabaseStorageController extends ActionController
                     } elseif (is_string($value)) {
                     } elseif (is_object($value) && method_exists($value, '__toString')) {
                         $value = (string)$value;
+                    } elseif (isset($value['date'])) {
+                        $value = (new DateTime($value['date']))->format($this->settings['datetimeFormat']);
                     } else {
                         $value = '-';
                     }
@@ -256,6 +259,8 @@ class DatabaseStorageController extends ActionController
                     $values[] = $value;
                 } elseif (is_object($value) && method_exists($value, '__toString')) {
                     $values[] = (string)$value;
+                } elseif (isset($value['date'])) {
+                    $values[] = (new DateTime($value['date']))->format($this->settings['datetimeFormat']);
                 } else {
                     $values[] = '-';
                 }
