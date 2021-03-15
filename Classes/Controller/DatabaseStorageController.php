@@ -144,7 +144,7 @@ class DatabaseStorageController extends ActionController
                     } elseif (is_object($value) && method_exists($value, '__toString')) {
                         $value = (string)$value;
                     } elseif (isset($value['date'])) {
-                        $value = (new DateTime($value['date']))->format($this->settings['datetimeFormat']);
+                        $value = (new \DateTime($value['date']))->format($this->settings['datetimeFormat']);
                     } else {
                         $value = '-';
                     }
@@ -260,7 +260,7 @@ class DatabaseStorageController extends ActionController
                 } elseif (is_object($value) && method_exists($value, '__toString')) {
                     $values[] = (string)$value;
                 } elseif (isset($value['date'])) {
-                    $values[] = (new DateTime($value['date']))->format($this->settings['datetimeFormat']);
+                    $values[] = (new \DateTime($value['date']))->format($this->settings['datetimeFormat']);
                 } else {
                     $values[] = '-';
                 }
