@@ -17,6 +17,7 @@ namespace Wegmeister\DatabaseStorage\Finishers;
 use Neos\Flow\Annotations as Flow;
 use Neos\Form\Core\Model\AbstractFinisher;
 use Neos\Form\Exception\FinisherException;
+use Neos\Media\Domain\Model\AssetInterface;
 
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
@@ -46,6 +47,12 @@ class DatabaseStorageFinisher extends AbstractFinisher
     {
         $formRuntime = $this->finisherContext->getFormRuntime();
         $formValues = $formRuntime->getFormState()->getFormValues();
+
+        foreach ($formValues as &$formValue) {
+            if ($formValue instanceof AssetInterface) {
+                $formValue = $formValue->getResource();
+            }
+        }
 
         $identifier = $this->parseOption('identifier');
         if (!$identifier) {
