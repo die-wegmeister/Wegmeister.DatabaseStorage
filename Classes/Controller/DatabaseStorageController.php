@@ -21,6 +21,7 @@ use Neos\Flow\I18n\Translator;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Flow\ResourceManagement\PersistentResource;
+use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
@@ -96,7 +97,6 @@ class DatabaseStorageController extends ActionController
      */
     protected $settings;
 
-
     /**
      * Inject the settings
      *
@@ -108,6 +108,12 @@ class DatabaseStorageController extends ActionController
     {
         $this->settings = $settings;
     }
+
+    /**
+     * @Flow\Inject
+     * @var NodeDataRepository
+     */
+    protected $nodeDataRepository;
 
     /**
      * Show list of identifiers
@@ -131,19 +137,44 @@ class DatabaseStorageController extends ActionController
     public function showAction(string $identifier)
     {
         $entries = $this->databaseStorageRepository->findByStorageidentifier($identifier);
-        $titles = [];
+        $titles = $this->getAllFieldTitles($entries);
         if (isset($entries[0])) {
-            foreach ($entries[0]->getProperties() as $title => $value) {
-                $titles[] = $title;
-            }
             foreach ($entries as $entry) {
-                $properties = $entry->getProperties();
+                $values = [];
+                foreach ($entry->getProperties() as $title => $value) {
+                    # get field NodeData
+                    $fieldNodeData = $this->nodeDataRepository->findByNodeIdentifier($title)[0];
+                    if ($fieldNodeData != null) {
+                        $type = $fieldNodeData->getNodeType();
+                        if (in_array($type->getName(), $this->settings['ignoredExportNodeTypes'])) {
+                            continue;
+                        }
+                        $title = $this->getFieldNodeIdLabelOrIdentifier($fieldNodeData);
+                    }
 
-                foreach ($properties as &$value) {
-                    $value = $this->getStringValue($value);
+                    if ($value instanceof PersistentResource) {
+                        $values[$title] = $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
+                    } elseif (is_string($value)) {
+                        $values[$title] = $value;
+                    } elseif (is_array($value)) {
+                        $values[$title] = implode(', ', $value);
+                    } elseif (is_object($value) && method_exists($value, '__toString')) {
+                        $values[$title] = (string)$value;
+                    } elseif (isset($value['dateFormat'], $value['date'])) {
+                        $timezone = null;
+                        if(isset($value['timezone'])){
+                            $timezone = new \DateTimeZone($value['timezone']);
+                        }
+                        $dateTime = \DateTime::createFromFormat($value['dateFormat'], $value['date'], $timezone);
+                        $values[$title] = $dateTime->format($this->settings['datetimeFormat']);
+                    } else {
+                        $values[$title] = '-';
+                    }
                 }
 
-                $entry->setProperties($properties);
+                # sort values according titles
+                $values = array_merge(array_flip($titles), $values);
+                $entry->setProperties($values);
             }
             $this->view->assign('identifier', $identifier);
             $this->view->assign('titles', $titles);
@@ -154,6 +185,51 @@ class DatabaseStorageController extends ActionController
         }
     }
 
+    /**
+     * Get field titles of all saved entries to allow the export of all fields added/removed over time
+     *
+     *
+     * @param $entries
+     * @return array
+     */
+    protected function getAllFieldTitles($entries)
+    {
+        $titles = [];
+
+        foreach ($entries as $entry) {
+            foreach ($entry->getProperties() as $title => $value) {
+                # get field NodeData
+                $fieldNodeData = $this->nodeDataRepository->findByNodeIdentifier($title)[0];
+
+                if ($fieldNodeData != null) {
+                    $type = $fieldNodeData->getNodeType();
+                    if (in_array($type->getName(), $this->settings['ignoredExportNodeTypes'])) {
+                        continue;
+                    }
+                    # override identifier
+                    $title = $this->getFieldNodeIdLabelOrIdentifier($fieldNodeData);
+                }
+
+                $titles[$title] = $title;
+            }
+        }
+        $titles = array_unique($titles);
+        return $titles;
+    }
+
+    /**
+     * Get field label if no ID was set. use identifier as fallback only
+     *
+     * @param $fieldNodeData
+     * @return string
+     */
+    protected function getFieldNodeIdLabelOrIdentifier($fieldNodeData)
+    {
+        $identifier = $fieldNodeData->getIdentifier();
+        return $fieldNodeData->getProperty('identifier') == null && $fieldNodeData->getProperty(
+            'label'
+        ) == null ? $identifier : $fieldNodeData->getProperty('label') . '_label';
+    }
 
     /**
      * Delete an entry from the list of identifiers.
@@ -227,12 +303,9 @@ class DatabaseStorageController extends ActionController
         $spreadsheet->setActiveSheetIndex(0);
         $spreadsheet->getActiveSheet()->setTitle($this->settings['title']);
 
-        $titles = [];
-        $columns = 0;
-        foreach ($entries[0]->getProperties() as $title => $value) {
-            $titles[] = $title;
-            $columns++;
-        }
+        $titles = $this->getAllFieldTitles($entries);
+        $columns = count($titles);
+
         if ($exportDateTime) {
             // TODO: Translate title for datetime
             $titles[] = 'DateTime';
@@ -241,16 +314,44 @@ class DatabaseStorageController extends ActionController
 
         $dataArray[] = $titles;
 
-
         foreach ($entries as $entry) {
             $values = [];
 
-            foreach ($entry->getProperties() as $value) {
-                $values[] = $this->getStringValue($value);
+            foreach ($entry->getProperties() as $title => $value) {
+                # get field NodeData
+                $fieldNodeData = $this->nodeDataRepository->findByNodeIdentifier($title)[0];
+                if ($fieldNodeData != null) {
+                    $type = $fieldNodeData->getNodeType();
+                    if (in_array($type->getName(), $this->settings['ignoredExportNodeTypes'])) {
+                        continue;
+                    }
+                    $title = $this->getFieldNodeIdLabelOrIdentifier($fieldNodeData);
+                }
+                if ($value instanceof PersistentResource) {
+                    $values[$title] = $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
+                } elseif (is_string($value)) {
+                    $values[$title] = $value;
+                } elseif (is_array($value)) {
+                    $values[$title] = implode(', ', $value);
+                } elseif (is_object($value) && method_exists($value, '__toString')) {
+                    $values[$title] = (string)$value;
+                } elseif (isset($value['dateFormat'], $value['date'])) {
+                    $timezone = null;
+                    if(isset($value['timezone'])){
+                        $timezone = new \DateTimeZone($value['timezone']);
+                    }
+                    $dateTime = \DateTime::createFromFormat($value['dateFormat'], $value['date'], $timezone);
+                    $values[$title] = $dateTime->format($this->settings['datetimeFormat']);
+                } else {
+                    $values[$title] = '-';
+                }
             }
 
+            # sort values according titles
+            $values = array_merge(array_flip($titles), $values);
+
             if ($exportDateTime) {
-                $values[] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
+                $values['DateTime'] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
             }
 
             $dataArray[] = $values;
