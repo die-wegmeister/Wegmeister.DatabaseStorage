@@ -21,7 +21,7 @@
               <tr>
                 <th class="size-sm"><!-- Actions -->&nbsp;</th>
                 <f:for each="{titles}" as="title">
-                  <th>{title}</th>
+                  <th>{title -> f:format.nl2br()}</th>
                 </f:for>
                 <th>{neos:backend.translate(id: 'storage.datetime')}</th>
               </tr>
