@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file controls the backend of the database storage.
  *
@@ -12,6 +13,7 @@
  * @license  https://github.com/die-wegmeister/Wegmeister.DatabaseStorage/blob/master/LICENSE GPL-3.0-or-later
  * @link     https://github.com/die-wegmeister/Wegmeister.DatabaseStorage
  */
+
 namespace Wegmeister\DatabaseStorage\Controller;
 
 use Neos\Flow\Annotations as Flow;
@@ -138,20 +140,14 @@ class DatabaseStorageController extends ActionController
                 $properties = $entry->getProperties();
 
                 foreach ($properties as &$value) {
-                    if ($value instanceof PersistentResource) {
-                        $value = $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
-                    } elseif (is_string($value)) {
-                    } elseif (is_object($value) && method_exists($value, '__toString')) {
-                        $value = (string)$value;
-                    } elseif (isset($value['dateFormat'], $value['date'])) {
-                        $timezone = null;
-                        if(isset($value['timezone'])){
-                            $timezone = new \DateTimeZone($value['timezone']);
+                    if (is_array($value)) {
+                        // Todo fix this for deep arrays
+                        foreach ($value as &$innerValue) {
+                            $innerValue = $this->getStringValue($innerValue);
                         }
-                        $dateTime = \DateTime::createFromFormat($value['dateFormat'], $value['date'], $timezone);
-                        $value = $dateTime->format($this->settings['datetimeFormat']);
+                        $value = sprintf('<ul><li>%s</li></ul>', implode('</li><li>', $value));
                     } else {
-                        $value = '-';
+                        $value = $this->getStringValue($value);
                     }
                 }
 
@@ -258,22 +254,7 @@ class DatabaseStorageController extends ActionController
             $values = [];
 
             foreach ($entry->getProperties() as $value) {
-                if ($value instanceof PersistentResource) {
-                    $values[] = $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
-                } elseif (is_string($value)) {
-                    $values[] = $value;
-                } elseif (is_object($value) && method_exists($value, '__toString')) {
-                    $values[] = (string)$value;
-                } elseif (isset($value['dateFormat'], $value['date'])) {
-                    $timezone = null;
-                    if(isset($value['timezone'])){
-                        $timezone = new \DateTimeZone($value['timezone']);
-                    }
-                    $dateTime = \DateTime::createFromFormat($value['dateFormat'], $value['date'], $timezone);
-                    $values[] = $dateTime->format($this->settings['datetimeFormat']);
-                } else {
-                    $values[] = '-';
-                }
+                $values[] = $this->getStringValue($value);
             }
 
             if ($exportDateTime) {
@@ -325,5 +306,43 @@ class DatabaseStorageController extends ActionController
         $writer = IOFactory::createWriter($spreadsheet, $writerType);
         $writer->save('php://output');
         exit;
+    }
+
+    /**
+     * Internal function to replace value with a string for export / listing.
+     *
+     * @param mixed $value  The database column value.
+     * @param int   $indent The level of indentation (for array values).
+     *
+     * @return string
+     */
+    protected function getStringValue($value, int $indent = 0): string
+    {
+        if ($value instanceof PersistentResource) {
+            return $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
+        } elseif (is_string($value)) {
+            return $value;
+        } elseif (is_object($value) && method_exists($value, '__toString')) {
+            return (string)$value;
+        } elseif (isset($value['dateFormat'], $value['date'])) {
+            $timezone = null;
+            if (isset($value['timezone'])) {
+                $timezone = new \DateTimeZone($value['timezone']);
+            }
+            $dateTime = \DateTime::createFromFormat($value['dateFormat'], $value['date'], $timezone);
+            return $dateTime->format($this->settings['datetimeFormat']);
+        } elseif (is_array($value)) {
+            foreach ($value as &$innerValue) {
+                $innerValue = $this->getStringValue($innerValue, $indent + 1);
+            }
+            $prefix = str_repeat(' ', $indent * 2) . '- ';
+            return sprintf(
+                '%s%s',
+                $prefix,
+                implode("\r\n" . $prefix, $value)
+            );
+        }
+
+        return '-';
     }
 }
