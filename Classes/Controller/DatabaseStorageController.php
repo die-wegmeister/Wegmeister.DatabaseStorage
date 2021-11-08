@@ -140,15 +140,7 @@ class DatabaseStorageController extends ActionController
                 $properties = $entry->getProperties();
 
                 foreach ($properties as &$value) {
-                    if (is_array($value)) {
-                        // Todo fix this for deep arrays
-                        foreach ($value as &$innerValue) {
-                            $innerValue = $this->getStringValue($innerValue);
-                        }
-                        $value = sprintf('<ul><li>%s</li></ul>', implode('</li><li>', $value));
-                    } else {
-                        $value = $this->getStringValue($value);
-                    }
+                    $value = $this->getStringValue($value);
                 }
 
                 $entry->setProperties($properties);
