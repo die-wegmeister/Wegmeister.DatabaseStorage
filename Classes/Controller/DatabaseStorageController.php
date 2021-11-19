@@ -30,6 +30,8 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
 
+use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
+
 /**
  * The Database Storage controller
  *
@@ -96,7 +98,6 @@ class DatabaseStorageController extends ActionController
      */
     protected $settings;
 
-
     /**
      * Inject the settings
      *
@@ -119,6 +120,11 @@ class DatabaseStorageController extends ActionController
         $this->view->assign('identifiers', $this->databaseStorageRepository->findStorageidentifiers());
     }
 
+    /**
+     * @Flow\Inject
+     * @var NodeDataRepository
+     */
+    protected $nodeDataRepository;
 
     /**
      * List entries of a given storage identifier.
@@ -131,19 +137,29 @@ class DatabaseStorageController extends ActionController
     public function showAction(string $identifier)
     {
         $entries = $this->databaseStorageRepository->findByStorageidentifier($identifier);
-        $titles = [];
-        if (isset($entries[0])) {
-            foreach ($entries[0]->getProperties() as $title => $value) {
-                $titles[] = $title;
-            }
-            foreach ($entries as $entry) {
-                $properties = $entry->getProperties();
+        $titles = $this->getAllFieldTitles($entries);
 
-                foreach ($properties as &$value) {
-                    $value = $this->getStringValue($value);
+        if (isset($entries[0])) {
+            $values = [];
+            foreach ($entries as $entry) {
+                foreach ($entry->getProperties() as $title => $value) {
+
+                    # get field NodeData
+                    $fieldNodeData = $this->nodeDataRepository->findByNodeIdentifier($title)[0];
+                    if ($fieldNodeData != NULL) {
+                        $type = $fieldNodeData->getNodeType();
+                        if (in_array($type->getName(), $this->settings['ignoredExportNodeTypes'])) {
+                            continue;
+                        }
+                        $title = $this->getFieldNodeIdLabelOrIdentifier($fieldNodeData);
+                    }
+
+                    $values[$title] = $this->getStringValue($value);
                 }
 
-                $entry->setProperties($properties);
+                # sort values according titles
+                $values = array_merge(array_flip($titles), $values);
+                $entry->setProperties($values);
             }
             $this->view->assign('identifier', $identifier);
             $this->view->assign('titles', $titles);
@@ -175,7 +191,7 @@ class DatabaseStorageController extends ActionController
      * Delete all entries for the given identifier.
      *
      * @param string $identifier The storage identifier for the entries to be removed.
-     * @param bool   $redirect   Redirect to index?
+     * @param bool $redirect Redirect to index?
      *
      * @return void
      */
@@ -197,13 +213,57 @@ class DatabaseStorageController extends ActionController
         }
     }
 
+    /**
+     * Get field titles of all saved entries to allow the export of all fields added/removed over time
+     *
+     *
+     * @param $entries
+     * @return array
+     */
+    protected function getAllFieldTitles($entries)
+    {
+        $titles = [];
+
+        foreach ($entries as $entry) {
+            foreach ($entry->getProperties() as $title => $value) {
+
+                # get field NodeData
+                $fieldNodeData = $this->nodeDataRepository->findByNodeIdentifier($title)[0];
+
+                if ($fieldNodeData != NULL) {
+                    $type = $fieldNodeData->getNodeType();
+                    if (in_array($type->getName(), $this->settings['ignoredExportNodeTypes'])) {
+                        continue;
+                    }
+                    # override identifier
+                    $title = $this->getFieldNodeIdLabelOrIdentifier($fieldNodeData);
+                }
+
+                $titles[$title] = $title;
+            }
+        }
+        $titles = array_unique($titles);
+        return $titles;
+    }
+
+    /**
+     * Get field label if no ID was set. use identifier as fallback only
+     *
+     * @param $fieldNodeData
+     * @return string
+     */
+    protected function getFieldNodeIdLabelOrIdentifier($fieldNodeData)
+    {
+        $identifier = $fieldNodeData->getIdentifier();
+        return $fieldNodeData->getProperty('identifier') == NULL && $fieldNodeData->getProperty('label') == NULL ? $identifier : $fieldNodeData->getProperty('label') . '_label';
+    }
 
     /**
      * Export all entries for a specific identifier as xls.
      *
-     * @param string $identifier     The storage identifier that should be exported.
-     * @param string $writerType     The writer type/export format to be used.
-     * @param bool   $exportDateTime Should the datetime be exported?
+     * @param string $identifier The storage identifier that should be exported.
+     * @param string $writerType The writer type/export format to be used.
+     * @param bool $exportDateTime Should the datetime be exported?
      *
      * @return void
      */
@@ -227,12 +287,9 @@ class DatabaseStorageController extends ActionController
         $spreadsheet->setActiveSheetIndex(0);
         $spreadsheet->getActiveSheet()->setTitle($this->settings['title']);
 
-        $titles = [];
-        $columns = 0;
-        foreach ($entries[0]->getProperties() as $title => $value) {
-            $titles[] = $title;
-            $columns++;
-        }
+        $titles = $this->getAllFieldTitles($entries);
+        $columns = count($titles);
+
         if ($exportDateTime) {
             // TODO: Translate title for datetime
             $titles[] = 'DateTime';
@@ -245,12 +302,25 @@ class DatabaseStorageController extends ActionController
         foreach ($entries as $entry) {
             $values = [];
 
-            foreach ($entry->getProperties() as $value) {
-                $values[] = $this->getStringValue($value);
+            foreach ($entry->getProperties() as $title => $value) {
+                # get field NodeData
+                $fieldNodeData = $this->nodeDataRepository->findByNodeIdentifier($title)[0];
+                if ($fieldNodeData != NULL) {
+                    $type = $fieldNodeData->getNodeType();
+                    if (in_array($type->getName(), $this->settings['ignoredExportNodeTypes'])) {
+                        continue;
+                    }
+                    $title = $this->getFieldNodeIdLabelOrIdentifier($fieldNodeData);
+                }
+
+                $values[$title] = $this->getStringValue($value);
             }
 
+            # sort values according titles
+            $values = array_merge(array_flip($titles), $values);
+
             if ($exportDateTime) {
-                $values[] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
+                $values['DateTime'] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
             }
 
             $dataArray[] = $values;
@@ -303,8 +373,8 @@ class DatabaseStorageController extends ActionController
     /**
      * Internal function to replace value with a string for export / listing.
      *
-     * @param mixed $value  The database column value.
-     * @param int   $indent The level of indentation (for array values).
+     * @param mixed $value The database column value.
+     * @param int $indent The level of indentation (for array values).
      *
      * @return string
      */

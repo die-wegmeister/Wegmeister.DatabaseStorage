@@ -30,3 +30,5 @@ Wegmeister:
     title: 'Database Export'
     subject: 'Database Export'
     datetimeFormat: 'Y-m-d H:i:s'
+    ignoredExportNodeTypes:
+      - 'Neos.Form.Builder:Section'

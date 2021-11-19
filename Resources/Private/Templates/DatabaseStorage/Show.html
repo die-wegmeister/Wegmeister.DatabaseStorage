@@ -1,7 +1,14 @@
 {namespace neos=Neos\Neos\ViewHelpers}
 <f:layout name="Default" />
 
-<f:section name="Title">{neos:backend.translate(id: 'storage.databaseStorage')} - {neos:backend.translate(id: 'storage.entriesForX', arguments: {0: identifier})}</f:section>
+<f:section name="Title">
+  <p><f:link.action action="index" class="neos-button">{neos:backend.translate(id: 'storage.backToIdentifiers')}</f:link.action></p>
+<div class="neos-row-fluid">
+  <legend>
+    {neos:backend.translate(id: 'storage.databaseStorage')} - [{f:if(condition: '{entries -> f:count()} > 0', then: '{entries -> f:count()}')}] {neos:backend.translate(id: 'storage.entriesForX', arguments: {0: identifier})}
+  </legend>
+</div>
+</f:section>
 
 <f:section name="Content">
   <style>
