@@ -1,6 +1,6 @@
 # Wegmeister.DatabaseStorage
 
-This package adds the ability to store values of a form (or other input) into database and export the stored data as xlsx, xls, ods, csv or html.
+This package adds the ability to store values of a form (or other input) into the database and export the stored data as xlsx, xls, ods, csv or html.
 
 ## Installation
 
@@ -12,10 +12,7 @@ composer require wegmeister/databasestorage
 
 ## Usage
 
-> :exclamation: The DatabaseStorage stores your data as JSON. Therefore only the Labels of the first entry can be used for the headline/export. Keep that in mind and try to avoid changing your forms later on. Whenever you add a now field **after** someone already entered some data, the new field would not exist in the headline row of the exported table :exclamation:
-
 You can add the DatabaseStorage Finisher in two ways:
-
 
 ### Add DatabaseStorage using yaml definitions
 
@@ -38,13 +35,12 @@ finishers:
 ```
 
 
-### Add DatabaseStorage using the new Neos Form-Builder
+### Add DatabaseStorage using the Neos Form Builder
 
-You can also use the DatabseStorage with the new [Neos.Form.Builder](https://github.com/neos/form-builder).
-You should be able to simply add DatabaseStorage as a finisher to your formular.
+You can also use the DatabseStorage with the [Neos.Form.Builder](https://github.com/neos/form-builder) package.
+You can simply add DatabaseStorage as a finisher to your form.
 
-Don't forget to set an (unique) `identifier`!
-
+Don't forget to set a (unique) `identifier`!
 
 ## Available settings
 
@@ -62,4 +58,11 @@ Wegmeister:
     subject: 'Database Export'
     # DateTime format if the datetime is included in the export
     datetimeFormat: 'Y-m-d H:i:s'
+    # Form element types that should not be part of the export
+    nodeTypesIgnoredInExport:
+      - 'Neos.Form.Builder:Section'
+      - 'Neos.Form.Builder:StaticText'
+      - 'Neos.Form.Builder:Password'
+      - 'Neos.Form.Builder:PasswordWithConfirmation'
+      - 'Neos.Form.Builder:HiddenField'
 ```

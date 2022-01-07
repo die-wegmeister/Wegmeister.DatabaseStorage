@@ -19,11 +19,10 @@ namespace Wegmeister\DatabaseStorage\Controller;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\I18n\Translator;
 use Neos\Flow\Mvc\Controller\ActionController;
-use Neos\Flow\ResourceManagement\ResourceManager;
-use Neos\Flow\ResourceManagement\PersistentResource;
 
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
+use Wegmeister\DatabaseStorage\Service\DatabaseStorageService;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -45,23 +44,23 @@ class DatabaseStorageController extends ActionController
     protected static $types = [
         'Xls' => [
             'extension' => 'xls',
-            'mimeType'  => 'application/vnd.ms-excel',
+            'mimeType' => 'application/vnd.ms-excel',
         ],
         'Xlsx' => [
             'extension' => 'xlsx',
-            'mimeType'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'mimeType' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ],
         'Ods' => [
             'extension' => 'ods',
-            'mimeType'  => 'application/vnd.oasis.opendocument.spreadsheet',
+            'mimeType' => 'application/vnd.oasis.opendocument.spreadsheet',
         ],
         'Csv' => [
             'extension' => 'csv',
-            'mimeType'  => 'text/csv',
+            'mimeType' => 'text/csv',
         ],
         'Html' => [
             'extension' => 'html',
-            'mimeType'  => 'text/html',
+            'mimeType' => 'text/html',
         ],
     ];
 
@@ -74,12 +73,9 @@ class DatabaseStorageController extends ActionController
     protected $databaseStorageRepository;
 
     /**
-     * Instance of the resource manager.
-     *
-     * @Flow\Inject
-     * @var ResourceManager
+     * @var DatabaseStorageService
      */
-    protected $resourceManager;
+    protected $databaseStorageService;
 
     /**
      * Instance of the translator interface.
@@ -95,7 +91,6 @@ class DatabaseStorageController extends ActionController
      * @var array
      */
     protected $settings;
-
 
     /**
      * Inject the settings
@@ -119,7 +114,6 @@ class DatabaseStorageController extends ActionController
         $this->view->assign('identifiers', $this->databaseStorageRepository->findStorageidentifiers());
     }
 
-
     /**
      * List entries of a given storage identifier.
      *
@@ -130,30 +124,34 @@ class DatabaseStorageController extends ActionController
      */
     public function showAction(string $identifier)
     {
+        $this->databaseStorageService = new DatabaseStorageService($identifier);
+
         $entries = $this->databaseStorageRepository->findByStorageidentifier($identifier);
-        $titles = [];
-        if (isset($entries[0])) {
-            foreach ($entries[0]->getProperties() as $title => $value) {
-                $titles[] = $title;
-            }
-            foreach ($entries as $entry) {
-                $properties = $entry->getProperties();
+        $formElementIdentifierToLabelMapping = $this->databaseStorageService->getFormElementIdentifierToLabelMapping(
+            $entries
+        );
 
-                foreach ($properties as &$value) {
-                    $value = $this->getStringValue($value);
-                }
-
-                $entry->setProperties($properties);
-            }
-            $this->view->assign('identifier', $identifier);
-            $this->view->assign('titles', $titles);
-            $this->view->assign('entries', $entries);
-            $this->view->assign('datetimeFormat', $this->settings['datetimeFormat']);
-        } else {
+        if (empty($entries)) {
             $this->redirect('index');
         }
-    }
 
+        /** @var DatabaseStorage $entry */
+        foreach ($entries as $entry) {
+            $values = [];
+            foreach ($formElementIdentifierToLabelMapping as $formElementIdentifier => $formElementLabel) {
+                $values[$formElementIdentifier] = $this->databaseStorageService->getValueFromEntryProperty(
+                    $entry,
+                    $formElementIdentifier
+                );
+            }
+            $entry->setProperties($values);
+        }
+
+        $this->view->assign('identifier', $identifier);
+        $this->view->assign('titles', $formElementIdentifierToLabelMapping);
+        $this->view->assign('entries', $entries);
+        $this->view->assign('datetimeFormat', $this->settings['datetimeFormat']);
+    }
 
     /**
      * Delete an entry from the list of identifiers.
@@ -166,16 +164,24 @@ class DatabaseStorageController extends ActionController
     {
         $identifier = $entry->getStorageidentifier();
         $this->databaseStorageRepository->remove($entry);
-        $this->addFlashMessage($this->translator->translateById('storage.flashmessage.entryRemoved', [], null, null, 'Main', 'Wegmeister.DatabaseStorage'));
+        $this->addFlashMessage(
+            $this->translator->translateById(
+                'storage.flashmessage.entryRemoved',
+                [],
+                null,
+                null,
+                'Main',
+                'Wegmeister.DatabaseStorage'
+            )
+        );
         $this->redirect('show', null, null, ['identifier' => $identifier]);
     }
-
 
     /**
      * Delete all entries for the given identifier.
      *
      * @param string $identifier The storage identifier for the entries to be removed.
-     * @param bool   $redirect   Redirect to index?
+     * @param bool $redirect Redirect to index?
      *
      * @return void
      */
@@ -192,18 +198,26 @@ class DatabaseStorageController extends ActionController
 
         if ($redirect) {
             // TODO: Translate flash message.
-            $this->addFlashMessage($this->translator->translateById('storage.flashmessage.entriesRemoved', [], null, null, 'Main', 'Wegmeister.DatabaseStorage'));
+            $this->addFlashMessage(
+                $this->translator->translateById(
+                    'storage.flashmessage.entriesRemoved',
+                    [],
+                    null,
+                    null,
+                    'Main',
+                    'Wegmeister.DatabaseStorage'
+                )
+            );
             $this->redirect('index');
         }
     }
 
-
     /**
      * Export all entries for a specific identifier as xls.
      *
-     * @param string $identifier     The storage identifier that should be exported.
-     * @param string $writerType     The writer type/export format to be used.
-     * @param bool   $exportDateTime Should the datetime be exported?
+     * @param string $identifier The storage identifier that should be exported.
+     * @param string $writerType The writer type/export format to be used.
+     * @param bool $exportDateTime Should the datetime be exported?
      *
      * @return void
      */
@@ -213,46 +227,47 @@ class DatabaseStorageController extends ActionController
             throw new WriterException('No writer available for type ' . $writerType . '.', 1521787983);
         }
 
-        $entries = $this->databaseStorageRepository->findByStorageidentifier($identifier)->toArray();
+        $this->databaseStorageService = new DatabaseStorageService($identifier);
+
+        $entries = $this->databaseStorageRepository->findByStorageidentifier($identifier);
 
         $dataArray = [];
 
         $spreadsheet = new Spreadsheet();
 
-        $spreadsheet->getProperties()
-            ->setCreator($this->settings['creator'])
-            ->setTitle($this->settings['title'])
-            ->setSubject($this->settings['subject']);
+        $spreadsheet->getProperties()->setCreator($this->settings['creator'])->setTitle(
+            $this->settings['title']
+        )->setSubject($this->settings['subject']);
 
         $spreadsheet->setActiveSheetIndex(0);
         $spreadsheet->getActiveSheet()->setTitle($this->settings['title']);
 
-        $titles = [];
-        $columns = 0;
-        foreach ($entries[0]->getProperties() as $title => $value) {
-            $titles[] = $title;
-            $columns++;
-        }
+        $formElementIdentifierToLabelMapping = $this->databaseStorageService->getFormElementIdentifierToLabelMapping(
+            $entries
+        );
+        $columns = count($formElementIdentifierToLabelMapping);
+
         if ($exportDateTime) {
             // TODO: Translate title for datetime
-            $titles[] = 'DateTime';
+            $formElementIdentifierToLabelMapping['DateTime'] = 'DateTime';
             $columns++;
         }
 
-        $dataArray[] = $titles;
+        $dataArray[] = $formElementIdentifierToLabelMapping;
 
-
+        /** @var DatabaseStorage $entry */
         foreach ($entries as $entry) {
             $values = [];
-
-            foreach ($entry->getProperties() as $value) {
-                $values[] = $this->getStringValue($value);
+            foreach ($formElementIdentifierToLabelMapping as $formElementIdentifier => $formElementLabel) {
+                $values[$formElementIdentifier] = $this->databaseStorageService->getValueFromEntryProperty(
+                    $entry,
+                    $formElementIdentifier
+                );
             }
-
+            $entry->setProperties($values);
             if ($exportDateTime) {
-                $values[] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
+                $values['DateTime'] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
             }
-
             $dataArray[] = $values;
         }
 
@@ -265,16 +280,15 @@ class DatabaseStorageController extends ActionController
             $index = $i % 26;
             $columnStyle = $spreadsheet->getActiveSheet()->getStyle($prefixKey . chr(65 + $index) . '1');
             $columnStyle->getFont()->setBold(true);
-            $columnStyle->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                ->setVertical(Alignment::VERTICAL_CENTER);
+            $columnStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(
+                Alignment::VERTICAL_CENTER
+            );
 
             if ($index + 1 > 25) {
                 $prefixIndex++;
                 $prefixKey = chr($prefixIndex);
             }
         }
-
 
         if (ini_get('zlib.output_compression')) {
             ini_set('zlib.output_compression', 'Off');
@@ -300,41 +314,4 @@ class DatabaseStorageController extends ActionController
         exit;
     }
 
-    /**
-     * Internal function to replace value with a string for export / listing.
-     *
-     * @param mixed $value  The database column value.
-     * @param int   $indent The level of indentation (for array values).
-     *
-     * @return string
-     */
-    protected function getStringValue($value, int $indent = 0): string
-    {
-        if ($value instanceof PersistentResource) {
-            return $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
-        } elseif (is_string($value)) {
-            return $value;
-        } elseif (is_object($value) && method_exists($value, '__toString')) {
-            return (string)$value;
-        } elseif (isset($value['dateFormat'], $value['date'])) {
-            $timezone = null;
-            if (isset($value['timezone'])) {
-                $timezone = new \DateTimeZone($value['timezone']);
-            }
-            $dateTime = \DateTime::createFromFormat($value['dateFormat'], $value['date'], $timezone);
-            return $dateTime->format($this->settings['datetimeFormat']);
-        } elseif (is_array($value)) {
-            foreach ($value as &$innerValue) {
-                $innerValue = $this->getStringValue($innerValue, $indent + 1);
-            }
-            $prefix = str_repeat(' ', $indent * 2) . '- ';
-            return sprintf(
-                '%s%s',
-                $prefix,
-                implode("\r\n" . $prefix, $value)
-            );
-        }
-
-        return '-';
-    }
 }
