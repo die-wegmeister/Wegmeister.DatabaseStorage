@@ -12,10 +12,7 @@ composer require wegmeister/databasestorage
 
 ## Usage
 
-> :exclamation: The DatabaseStorage stores your data as JSON. Therefore only the labels of the first entry can be used for the headline/export. Keep that in mind and try to avoid changing your forms later on. Whenever you add a field **after** someone already entered some data, the new field would not exist in the headline row of the exported table :exclamation:
-
 You can add the DatabaseStorage Finisher in the following ways:
-
 
 ### Add DatabaseStorage using YAML definitions
 
@@ -74,4 +71,10 @@ Wegmeister:
     subject: 'Database Export'
     # DateTime format if the datetime is included in the export
     datetimeFormat: 'Y-m-d H:i:s'
+    # Form element types that should not be part of the export
+    nodeTypesIgnoredInExport:
+      - 'Neos.Form.Builder:Section'
+      - 'Neos.Form.Builder:StaticText'
+      - 'Neos.Form.Builder:Password'
+      - 'Neos.Form.Builder:PasswordWithConfirmation'
 ```
