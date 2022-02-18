@@ -19,6 +19,7 @@
   properties:
     'identifier':
       ui:
+        showInCreationDialog: true
         inspector:
           group: 'finisher'
       validation:
