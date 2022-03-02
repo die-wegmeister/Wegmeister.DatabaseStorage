@@ -1,4 +1,5 @@
 {namespace neos=Neos\Neos\ViewHelpers}
+{namespace dbs=Wegmeister\DatabaseStorage\ViewHelpers}
 <f:layout name="Default" />
 
 <f:section name="Title">
@@ -15,8 +16,9 @@
     .scrollable-table {overflow-x: auto; width: 100%;}
     .scrollable-table .neos-table {min-width: 100%; max-width: none;}
     .size-sm {width: 50px;}
-    .neos.neos-module table td,
-    .neos.neos-module table th {line-height: 24px; padding: 8px 16px;}
+    .neos.neos-module table.neos-table td,
+    .neos.neos-module table.neos-table th {line-height: 24px; padding: 8px 16px;}
+    .neos.neos-module table td a {text-decoration: underline;}
   </style>
 
   <div class="neos-row-fluid">
@@ -66,7 +68,7 @@
                   </div>
                 </td>
                 <f:for each="{entry.properties}" as="property">
-                  <td>{property -> f:format.nl2br()}</td>
+                  <td>{property -> f:format.nl2br() -> dbs:formatUris()}</td>
                 </f:for>
                 <td>{f:format.date(date: entry.dateTime, format: datetimeFormat)}</td>
               </tr>
