@@ -1,6 +1,6 @@
 # Wegmeister.DatabaseStorage
 
-This package adds the ability to store values of a form (or other input) into database and export the stored data as xlsx, xls, ods, csv or html.
+This package adds the ability to store form submissions into a database and export the stored data as xlsx, xls, ods, csv or html.
 
 ## Installation
 
@@ -12,12 +12,12 @@ composer require wegmeister/databasestorage
 
 ## Usage
 
-> :exclamation: The DatabaseStorage stores your data as JSON. Therefore only the Labels of the first entry can be used for the headline/export. Keep that in mind and try to avoid changing your forms later on. Whenever you add a now field **after** someone already entered some data, the new field would not exist in the headline row of the exported table :exclamation:
+> :exclamation: The DatabaseStorage stores your data as JSON. Therefore only the labels of the first entry can be used for the headline/export. Keep that in mind and try to avoid changing your forms later on. Whenever you add a field **after** someone already entered some data, the new field would not exist in the headline row of the exported table :exclamation:
 
-You can add the DatabaseStorage Finisher in two ways:
+You can add the DatabaseStorage Finisher in the following ways:
 
 
-### Add DatabaseStorage using yaml definitions
+### Add DatabaseStorage using YAML definitions
 
 Add the DatabaseStorage a finisher in your form definition/yaml file:
 
@@ -37,14 +37,26 @@ finishers:
       identifier: 'my-form-data'
 ```
 
+### Add DatabaseStorage using the Neos Form Builder
 
-### Add DatabaseStorage using the new Neos Form-Builder
+You can also use the DatabaseStorage with the [Neos.Form.Builder](https://github.com/neos/form-builder).
+You should be able to simply add DatabaseStorage as a finisher to your form.
 
-You can also use the DatabseStorage with the new [Neos.Form.Builder](https://github.com/neos/form-builder).
-You should be able to simply add DatabaseStorage as a finisher to your formular.
+Don't forget to set a (unique) `identifier`!
 
-Don't forget to set an (unique) `identifier`!
+### Add DatabaseStorage using a Fusion Form
 
+You can also use the DatabaseStorage [Neos.Fusion.Form](https://github.com/neos/fusion-form) action.
+
+Add the following configuration to your form action definition:
+
+    databaseStorage {
+        type = '\\Wegmeister\\DatabaseStorage\\FusionForm\\Runtime\\Action\\DatabaseStorageAction'
+        options {
+            identifier = 'identifier-in-backend'
+            formValues = ${data}
+        }
+    }
 
 ## Available settings
 
