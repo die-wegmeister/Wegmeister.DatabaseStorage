@@ -41,6 +41,12 @@ class DatabaseStorageService
 
     /**
      * @var array
+     * @Flow\InjectConfiguration(path="nodeTypesIgnoredInFinisher", package="Wegmeister.DatabaseStorage")
+     */
+    protected $nodeTypesIgnoredInFinisher;
+
+    /**
+     * @var array
      * @Flow\InjectConfiguration(path="nodeTypesIgnoredInExport", package="Wegmeister.DatabaseStorage")
      */
     protected $nodeTypesIgnoredInExport;
@@ -66,6 +72,16 @@ class DatabaseStorageService
     public function __construct(string $formStorageIdentifier = '')
     {
         $this->formStorageIdentifier = $formStorageIdentifier;
+    }
+
+    public function formElementIdentifierMustBeIgnoredInFinisher(string $formValueIdentifier): bool
+    {
+        $formElementData = $this->getFormElementDataByIdentifier($formValueIdentifier);
+        if (!$formElementData) {
+            // No Form definition found, so we cannot know if it should be ignored --> do nothing
+            return false;
+        }
+        return in_array($formElementData['nodeTypeName'], $this->nodeTypesIgnoredInFinisher);
     }
 
     public function nodeTypeMustBeIgnoredInExport($nodeTypeName): bool

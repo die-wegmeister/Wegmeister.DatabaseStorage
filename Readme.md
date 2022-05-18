@@ -71,7 +71,11 @@ Wegmeister:
     subject: 'Database Export'
     # DateTime format if the datetime is included in the export
     datetimeFormat: 'Y-m-d H:i:s'
-    # Form element types that should not be part of the export
+    # Form element types that should not be stored by the finisher (for Node-based forms)
+    nodeTypesIgnoredInFinisher:
+      - 'Neos.Form.Builder:Section'
+      - 'Neos.Form.Builder:StaticText'
+    # Form element types that should not be part of the export (for Node-based forms)
     nodeTypesIgnoredInExport:
       - 'Neos.Form.Builder:Section'
       - 'Neos.Form.Builder:StaticText'
