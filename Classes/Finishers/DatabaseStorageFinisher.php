@@ -21,6 +21,7 @@ use Neos\Media\Domain\Model\AssetInterface;
 
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
+use Wegmeister\DatabaseStorage\Service\DatabaseStorageService;
 
 /**
  * A simple finisher that stores data into database
@@ -36,6 +37,11 @@ class DatabaseStorageFinisher extends AbstractFinisher
     protected $databaseStorageRepository;
 
     /**
+     * @var DatabaseStorageService
+     */
+    protected $databaseStorageService;
+
+    /**
      * Executes this finisher
      *
      * @see AbstractFinisher::execute()
@@ -48,15 +54,20 @@ class DatabaseStorageFinisher extends AbstractFinisher
         $formRuntime = $this->finisherContext->getFormRuntime();
         $formValues = $formRuntime->getFormState()->getFormValues();
 
-        foreach ($formValues as &$formValue) {
-            if ($formValue instanceof AssetInterface) {
-                $formValue = $formValue->getResource();
-            }
+        $identifier = $this->parseOption('identifier');
+        if ($identifier) {
+            $this->databaseStorageService = new DatabaseStorageService($identifier);
+        } else {
+            $identifier = '__undefined__';
         }
 
-        $identifier = $this->parseOption('identifier');
-        if (!$identifier) {
-            $identifier = '__undefined__';
+        foreach ($formValues as $formElementIdentifier => $formValue) {
+            if ($formValue instanceof AssetInterface) {
+                $formValues[$formElementIdentifier] = $formValue->getResource();
+            }
+            if ($identifier && $this->databaseStorageService->formElementIdentifierMustBeIgnoredInFinisher($formElementIdentifier)) {
+                unset($formValues[$formElementIdentifier]);
+            }
         }
 
         $dbStorage = new DatabaseStorage();
