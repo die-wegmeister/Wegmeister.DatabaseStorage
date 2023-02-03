@@ -27,7 +27,7 @@ renderables:
 
 finishers:
   -
-    identifier: 'Wegmeister.Database:DatabaseStorageFinisher'
+    identifier: 'Wegmeister.DatabaseStorage:DatabaseStorageFinisher'
     options:
       # The identifier is used to group your data in the database.
       # You should avoid using the same identifier twice or your data could become a little messed up.
