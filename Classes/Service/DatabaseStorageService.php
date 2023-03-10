@@ -22,12 +22,18 @@ use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Neos\Domain\Service\SiteService;
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
+use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
 
 /**
  * @Flow\Scope("singleton")
  */
 class DatabaseStorageService
 {
+    /**
+     * @var DatabaseStorageRepository
+     * @Flow\Inject
+     */
+    protected $databaseStorageRepository;
 
     /**
      * @var array
@@ -444,5 +450,40 @@ class DatabaseStorageService
         }
 
         return '';
+    }
+
+    /**
+     * Deletes given entry.
+     *
+     * @param DatabaseStorage $entry
+     *
+     * @return void
+     */
+    public function deleteEntry($entry): void
+    {
+        $this->databaseStorageRepository->remove($entry);
+    }
+
+    /**
+     * Gets entries for given storage identifier.
+     *
+     * @param string $storageIdentifier
+     *
+     * @return \Generator
+     */
+    public function getEntriesForCleanup(string $storageIdentifier): \Generator
+    {
+        $query = $this->databaseStorageRepository->createQuery();
+        $constraints = [];
+        $constraints[] = $query->equals('storageidentifier', $storageIdentifier);
+        $query->matching(
+            $query->logicalAnd(
+                $constraints
+            )
+        );
+
+        foreach ($query->execute() as $entry) {
+            yield $entry;
+        }
     }
 }
