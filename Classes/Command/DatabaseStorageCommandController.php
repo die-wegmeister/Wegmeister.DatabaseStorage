@@ -2,6 +2,7 @@
 
 namespace Wegmeister\DatabaseStorage\Command;
 
+use DateInterval;
 use DateTime;
 use Wegmeister\DatabaseStorage\Service\DatabaseStorageService;
 use Neos\Flow\Annotations as Flow;
@@ -26,15 +27,18 @@ class DatabaseStorageCommandController extends CommandController
     protected $storageCleanupConfiguration;
 
     /**
-     * Deletes entries of honorary members, older than 6 months
+     * Deletes entries of configured storages older than configured date interval
      */
     public function cleanUpConfiguredStoragesCommand(): void
     {
-        foreach ($this->storageCleanupConfiguration as $storageIdentifier => $daysToKeep) {
-            $this->outputLine('Removing entries from storage "%s" older than %s days...', [$storageIdentifier, $daysToKeep]);
+        foreach ($this->storageCleanupConfiguration as $storageIdentifier => $dateInterval) {
+            $newDateInterval = new DateInterval($dateInterval);
+            $intervalDateTime = (new DateTime())->add($newDateInterval);
+
+            $this->outputLine('Removing entries from storage "%s" older than %s days...', [$storageIdentifier, $newDateInterval->format('d')]);
             $outdatedEntries = 0;
             foreach ($this->databaseStorageService->getEntriesForCleanup($storageIdentifier) as $entry) {
-                if (date_diff($entry->getDateTime(), new DateTime('now'))->days >= $daysToKeep) {
+                if (date_diff($entry->getDateTime(), new DateTime('now')) >= $intervalDateTime) {
                     $this->databaseStorageService->deleteEntry($entry);
                     $outdatedEntries++;
                 }
