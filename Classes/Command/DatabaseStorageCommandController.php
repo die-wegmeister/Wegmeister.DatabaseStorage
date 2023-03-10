@@ -21,7 +21,7 @@ class DatabaseStorageCommandController extends CommandController
 
     // TODO: set configurations and define path
     /**
-     * @Flow\InjectConfiguration(package="Vendor.Package", path="databaseStorageCleanup.storageCleanupConfiguration")
+     * @Flow\InjectConfiguration(package="Wegmeister.DatabaseStorage", path="cleanup")
      * @var array
      */
     protected $storageCleanupConfiguration;
