@@ -82,3 +82,24 @@ Wegmeister:
       - 'Neos.Form.Builder:Password'
       - 'Neos.Form.Builder:PasswordWithConfirmation'
 ```
+
+## Cleanup command
+
+The package comes with a cleanup command to delete data older than a date interval you can define in your settings.
+You can run the command manually or use a cron job.
+
+Add storages you wish to be cleaned up and define how long the data of each storage should be stored:
+
+```yaml
+
+Wegmeister:
+  DatabaseStorage:
+    cleanup:
+      # Add storage identifier you wish to be cleaned up
+      storageIdentifier1:
+        # Define how long the data should be stored as date interval
+        # https://www.php.net/manual/en/class.dateinterval.php
+        dateInterval: "P6M"
+      storageIdentifier2:
+          dateInterval: "P1Y"
+```
