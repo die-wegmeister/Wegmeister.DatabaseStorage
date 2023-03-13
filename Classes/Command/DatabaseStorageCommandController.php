@@ -32,13 +32,14 @@ class DatabaseStorageCommandController extends CommandController
     public function cleanUpConfiguredStoragesCommand(): void
     {
         foreach ($this->storageCleanupConfiguration as $storageIdentifier => $dateInterval) {
-            $newDateInterval = new DateInterval($dateInterval);
+            $newDateInterval = new DateInterval($dateInterval['dateInterval']);
             $intervalDateTime = (new DateTime())->add($newDateInterval);
+            $daysToKeepData = date_diff($intervalDateTime, new DateTime('now'))->days;
 
-            $this->outputLine('Removing entries from storage "%s" older than %s days...', [$storageIdentifier, $newDateInterval->format('d')]);
+            $this->outputLine('Removing entries from storage "%s" older than %s days...', [$storageIdentifier, $daysToKeepData]);
             $outdatedEntries = 0;
             foreach ($this->databaseStorageService->getEntriesForCleanup($storageIdentifier) as $entry) {
-                if (date_diff($entry->getDateTime(), new DateTime('now')) >= $intervalDateTime) {
+                if (date_diff($entry->getDateTime(), new DateTime('now'))->days >= $daysToKeepData) {
                     $this->databaseStorageService->deleteEntry($entry);
                     $outdatedEntries++;
                 }
