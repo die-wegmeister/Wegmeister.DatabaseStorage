@@ -293,6 +293,12 @@ class DatabaseStorageService
         if (is_string($value)) {
             return $value;
         }
+        if (is_numeric($value)) {
+            return (string) $value;
+        }
+        if (is_bool($value)) {
+            return ($value ? 'true' : 'false');
+        }
         if (is_object($value) && method_exists($value, '__toString')) {
             return (string)$value;
         }
