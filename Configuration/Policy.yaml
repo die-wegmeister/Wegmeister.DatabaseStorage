@@ -11,6 +11,8 @@ privilegeTargets:
 
 roles:
   'Wegmeister.DatabaseStorage:DatabaseStorageViewer':
+    label: Database Storage Viewer
+    description: User is allowed to view all database storage lists and their entries.
     privileges:
       - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
         permission: GRANT
@@ -18,16 +20,26 @@ roles:
         permission: GRANT
 
   'Wegmeister.DatabaseStorage:DatabaseStorageExporter':
+    label: Database Storage Exporter
+    description: |
+      User is allowed to export all database storage lists.
+      Requires a role that can view the lists, otherwise only direct links to the export will work.
     privileges:
       - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
         permission: GRANT
 
   'Wegmeister.DatabaseStorage:DatabaseStorageDeleter':
+    label: Database Storage Deleter
+    description: |
+      User is allowed to delete all database storage lists or single entries.
+      Requires a role that can view the lists, otherwise only direct links to delete a list or an entry will work.
     privileges:
       - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageDeleter'
         permission: GRANT
 
   'Wegmeister.DatabaseStorage:DatabaseStorageAdmin':
+    label: Database Storage Admin
+    description: User is allowed to view, export and delete all database storage lists and their entries.
     privileges:
       - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
         permission: GRANT
