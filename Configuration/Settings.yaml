@@ -16,7 +16,7 @@ Neos:
         controller: \Wegmeister\DatabaseStorage\Controller\DatabaseStorageController
         description: 'Wegmeister.DatabaseStorage:Main:storage.databaseStorageDescription'
         icon: icon-database
-        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
 
     userInterface:
       translation:
