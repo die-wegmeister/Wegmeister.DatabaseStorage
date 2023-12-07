@@ -25,6 +25,7 @@ use Neos\Flow\ResourceManagement\PersistentResource;
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
 
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -215,8 +216,6 @@ class DatabaseStorageController extends ActionController
 
         $entries = $this->databaseStorageRepository->findByStorageidentifier($identifier)->toArray();
 
-        $dataArray = [];
-
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getProperties()
@@ -225,56 +224,57 @@ class DatabaseStorageController extends ActionController
             ->setSubject($this->settings['subject']);
 
         $spreadsheet->setActiveSheetIndex(0);
-        $spreadsheet->getActiveSheet()->setTitle($this->settings['title']);
+        $activeSheet = $spreadsheet->getActiveSheet();
+        $activeSheet->setTitle($this->settings['title']);
 
-        $titles = [];
         $columns = 0;
         foreach ($entries[0]->getProperties() as $title => $value) {
-            $titles[] = $title;
+            $columnLetter = $this->getColumnLetter($columns);
+            $activeSheet
+                ->getCell($columnLetter . '1')
+                ->setValueExplicit($title, DataType::TYPE_STRING);
             $columns++;
         }
         if ($exportDateTime) {
             // TODO: Translate title for datetime
-            $titles[] = 'DateTime';
+            $title = 'DateTime';
+            $columnLetter = $this->getColumnLetter($columns);
+            $activeSheet
+                ->getCell($columnLetter . '1')
+                ->setValueExplicit($title, DataType::TYPE_STRING);
             $columns++;
         }
 
-        $dataArray[] = $titles;
+        // Set styles for titles (bold and centered)
+        $lastColumnLetter = $this->getColumnLetter($columns - 1);
+        $columnStyle = $activeSheet->getStyle('A1:' . $lastColumnLetter . '1');
+        $columnStyle->getFont()->setBold(true);
+        $columnStyle->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
 
-
-        foreach ($entries as $entry) {
-            $values = [];
+        foreach ($entries as $i => $entry) {
+            $columnIndex = 0;
 
             foreach ($entry->getProperties() as $value) {
-                $values[] = $this->getStringValue($value);
+                $columnLetter = $this->getColumnLetter($columnIndex);
+                $value = $this->getStringValue($value);
+
+                // Use setValueExplicit to prevent Excel from interpreting values as formulas.
+                $activeSheet
+                    ->getCell($columnLetter . ($i + 2))
+                    ->setValueExplicit($value, DataType::TYPE_STRING);
+                $columnIndex++;
             }
 
             if ($exportDateTime) {
-                $values[] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
-            }
-
-            $dataArray[] = $values;
-        }
-
-        $spreadsheet->getActiveSheet()->fromArray($dataArray);
-
-        // Set headlines bold
-        $prefixIndex = 64;
-        $prefixKey = '';
-        for ($i = 0; $i < $columns; $i++) {
-            $index = $i % 26;
-            $columnStyle = $spreadsheet->getActiveSheet()->getStyle($prefixKey . chr(65 + $index) . '1');
-            $columnStyle->getFont()->setBold(true);
-            $columnStyle->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                ->setVertical(Alignment::VERTICAL_CENTER);
-
-            if ($index + 1 > 25) {
-                $prefixIndex++;
-                $prefixKey = chr($prefixIndex);
+                $columnLetter = $this->getColumnLetter($columnIndex);
+                $value = $entry->getDateTime()->format($this->settings['datetimeFormat']);
+                $activeSheet
+                    ->getCell($columnLetter . ($i + 2))
+                    ->setValueExplicit($value, DataType::TYPE_STRING);
             }
         }
-
 
         if (ini_get('zlib.output_compression')) {
             ini_set('zlib.output_compression', 'Off');
@@ -310,20 +310,33 @@ class DatabaseStorageController extends ActionController
      */
     protected function getStringValue($value, int $indent = 0): string
     {
+        // For resources return the public uri.
         if ($value instanceof PersistentResource) {
             return $this->resourceManager->getPublicPersistentResourceUri($value) ?: '-';
-        } elseif (is_string($value)) {
+        }
+
+        // Strings should be return as is.
+        if (is_string($value)) {
             return $value;
-        } elseif (is_object($value) && method_exists($value, '__toString')) {
+        }
+
+        // For any object that has a `__toString` method, return the string representation.
+        if (is_object($value) && method_exists($value, '__toString')) {
             return (string)$value;
-        } elseif (isset($value['dateFormat'], $value['date'])) {
+        }
+
+        // For DateTime objects, return the formatted date as defined in Settings.yaml.
+        if (isset($value['dateFormat'], $value['date'])) {
             $timezone = null;
             if (isset($value['timezone'])) {
                 $timezone = new \DateTimeZone($value['timezone']);
             }
             $dateTime = \DateTime::createFromFormat($value['dateFormat'], $value['date'], $timezone);
             return $dateTime->format($this->settings['datetimeFormat']);
-        } elseif (is_array($value)) {
+        }
+
+        // For arrays, return the entries as a list with indentation.
+        if (is_array($value)) {
             foreach ($value as &$innerValue) {
                 $innerValue = $this->getStringValue($innerValue, $indent + 1);
             }
@@ -335,6 +348,23 @@ class DatabaseStorageController extends ActionController
             );
         }
 
+        // If all else fails, return a dash.
         return '-';
+    }
+
+    /**
+     * Get column letter for a given index.
+     * @param int $index The index to get the prefix for.
+     * @return string
+     */
+    protected function getColumnLetter(int $index): string
+    {
+        $prefixLetter = '';
+        if ($index > 25) {
+            $prefixLetter = chr(floor($index / 26) + 64);
+        }
+        $letter = $prefixLetter . chr(($index % 26) + 65);
+
+        return $letter;
     }
 }
