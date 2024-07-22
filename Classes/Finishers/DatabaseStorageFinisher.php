@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The form finisher for the database storage.
  *
@@ -12,12 +13,13 @@
  * @license  https://github.com/die-wegmeister/Wegmeister.DatabaseStorage/blob/master/LICENSE GPL-3.0-or-later
  * @link     https://github.com/die-wegmeister/Wegmeister.DatabaseStorage
  */
+
 namespace Wegmeister\DatabaseStorage\Finishers;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Form\Core\Model\AbstractFinisher;
 use Neos\Form\Exception\FinisherException;
-use Neos\Media\Domain\Model\AssetInterface;
+use Neos\Media\Domain\Model\ResourceBasedInterface;
 
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
@@ -62,7 +64,7 @@ class DatabaseStorageFinisher extends AbstractFinisher
         }
 
         foreach ($formValues as $formElementIdentifier => $formValue) {
-            if ($formValue instanceof AssetInterface) {
+            if ($formValue instanceof ResourceBasedInterface) {
                 $formValues[$formElementIdentifier] = $formValue->getResource();
             }
             if ($identifier && $this->databaseStorageService->formElementIdentifierMustBeIgnoredInFinisher($formElementIdentifier)) {
