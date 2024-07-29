@@ -58,6 +58,17 @@ class DatabaseStorageService
     protected $datetimeFormat;
 
     /**
+     * @var array
+     * @Flow\InjectConfiguration(path="contentDimensions", package="Neos.ContentRepository")
+     */
+    protected $contentDimensions;
+
+    /**
+     * @var array
+     */
+    protected $preparedDimensions;
+
+    /**
      * @Flow\Inject
      * @var ContextFactory
      */
@@ -121,6 +132,65 @@ class DatabaseStorageService
     }
 
     /**
+     * Prepare configured dimensions for easier iteration
+     * @return void
+     */
+    protected function prepareDimensions(): void
+    {
+        if ($this->preparedDimensions !== null) {
+            // Dimensions are already prepared
+            return;
+        }
+
+        $this->preparedDimensions = [];
+        foreach ($this->contentDimensions as $identifier => $dimension) {
+            // Move default preset to first position
+            $dimensionPresets = array_merge(
+                [$dimension['default'] => $dimension['presets'][$dimension['default']]],
+                $dimension['presets'],
+            );
+
+            $this->preparedDimensions[$identifier] = [];
+            foreach ($dimensionPresets as $targetDimension => $preset) {
+                $this->preparedDimensions[$identifier][] = [
+                    'dimensions' => $preset['values'],
+                    'targetDimensions' => $targetDimension,
+                ];
+            }
+        }
+    }
+
+    /**
+     * Get the next set of dimensions to use for the export
+     * @param array $dimensions The current set of dimensions
+     * @return array|null
+     */
+    protected function getNextDimensions(array $dimensions): ?array
+    {
+        $this->prepareDimensions();
+
+        $nextDimensionFound = false;
+        foreach ($this->preparedDimensions as $dimension => $dimensionPresets) {
+            $dimensions[$dimension] = next($dimensionPresets);
+
+            if ($dimensions[$dimension] !== false) {
+                // Found the next dimension, skip further processing
+                $nextDimensionFound = true;
+                break;
+            }
+
+            // Reset the pointer to the first element and check next dimension for new value
+            $dimensions[$dimension] = reset($dimensionPresets);
+        }
+
+        if ($nextDimensionFound === false) {
+            return null;
+        }
+
+        return $dimensions;
+    }
+
+    /**
      * If the Node-based form is still available, node data such as the "speaking" identifier, the label
      * are looked up to provide the best possible label and value matching for the export.
      *
@@ -128,19 +198,41 @@ class DatabaseStorageService
      * @throws \Neos\ContentRepository\Exception\NodeException
      * @throws \Neos\Eel\Exception
      */
-    protected function getFormElementsNodeData(): ?array
+    protected function getFormElementsNodeData(?array $dimensions = null): ?array
     {
         if (!empty($this->formElementsNodeData)) {
             // First-level cache
             return $this->formElementsNodeData;
         }
+
+        if (empty($dimensions) && !empty($this->contentDimensions)) {
+            $this->prepareDimensions();
+
+            $dimensions = [];
+            foreach ($this->preparedDimensions as $dimension => $dimensionPresets) {
+                $dimensions[$dimension] = reset($dimensionPresets);
+            }
+        }
+
+        $contextProperties = [
+            'workspaceName' => 'live',
+            'invisibleContentShown' => true,
+            'removedContentShown' => true,
+            'inaccessibleContentShown' => false,
+        ];
+
+        if (!empty($dimensions)) {
+            $contextProperties['dimensions'] = [];
+            $contextProperties['targetDimensions'] = [];
+
+            foreach ($dimensions as $dimension => $dimensionPreset) {
+                $contextProperties['dimensions'][$dimension] = $dimensionPreset['dimensions'];
+                $contextProperties['targetDimensions'][$dimension] = $dimensionPreset['targetDimensions'];
+            }
+        }
+
         $context = $this->contextFactory->create(
-            [
-                'workspaceName' => 'live',
-                'invisibleContentShown' => true,
-                'removedContentShown' => true,
-                'inaccessibleContentShown' => false
-            ]
+            $contextProperties
         );
 
         // Find the finisher belonging to the formStorageIdentifier
@@ -148,8 +240,15 @@ class DatabaseStorageService
         $finisherNodes = $q->find(
             "[instanceof Wegmeister.DatabaseStorage:DatabaseStorageFinisher][identifier='" . $this->formStorageIdentifier . "']"
         )->get();
+
         if (count($finisherNodes) !== 1) {
             // None or more than one Finisher with the same identifier --> could be a Fusion or YAML form or ambiguous --> return
+            $nextDimensions = $this->getNextDimensions($dimensions);
+
+            if ($nextDimensions !== null) {
+                return $this->getFormElementsNodeData($nextDimensions);
+            }
+
             return null;
         }
 
@@ -158,6 +257,12 @@ class DatabaseStorageService
         $formNode = $q->parents('[instanceof Neos.Form.Builder:NodeBasedForm]')->get(0);
         if (!$formNode instanceof NodeInterface) {
             // No NodeBasedForm found, return
+            $nextDimensions = $this->getNextDimensions($dimensions);
+
+            if ($nextDimensions !== null) {
+                return $this->getFormElementsNodeData($nextDimensions);
+            }
+
             return null;
         }
 
@@ -167,6 +272,12 @@ class DatabaseStorageService
 
         if (empty($formElements)) {
             // No FormElements found, return
+            $nextDimensions = $this->getNextDimensions($dimensions);
+
+            if ($nextDimensions !== null) {
+                return $this->getFormElementsNodeData($nextDimensions);
+            }
+
             return null;
         }
 
@@ -324,5 +435,4 @@ class DatabaseStorageService
 
         return '';
     }
-
 }
