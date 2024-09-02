@@ -198,7 +198,7 @@ class DatabaseStorageService
      * @throws \Neos\ContentRepository\Exception\NodeException
      * @throws \Neos\Eel\Exception
      */
-    protected function getFormElementsNodeData(?array $dimensions = null): ?array
+    protected function getFormElementsNodeData(?array $dimensions = []): ?array
     {
         if (!empty($this->formElementsNodeData)) {
             // First-level cache
