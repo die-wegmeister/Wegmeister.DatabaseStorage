@@ -142,7 +142,13 @@ class DatabaseStorageService
             return;
         }
 
-        $this->preparedDimensions = [];
+        if (empty($this->contentDimensions)) {
+            // No dimensions configured
+            $this->preparedDimensions = [];
+            return;
+        }
+
+        $preparedDimensions = [];
         foreach ($this->contentDimensions as $identifier => $dimension) {
             // Move default preset to first position
             $dimensionPresets = array_merge(
@@ -150,44 +156,52 @@ class DatabaseStorageService
                 $dimension['presets'],
             );
 
-            $this->preparedDimensions[$identifier] = [];
+            $preparedDimensions[$identifier] = [];
             foreach ($dimensionPresets as $targetDimension => $preset) {
-                $this->preparedDimensions[$identifier][] = [
+                $preparedDimensions[$identifier][] = [
                     'dimensions' => $preset['values'],
                     'targetDimensions' => $targetDimension,
                 ];
             }
         }
+
+        $this->preparedDimensions = $this->createDimensionCombinations($preparedDimensions);
     }
 
     /**
-     * Get the next set of dimensions to use for the export
-     * @param array $dimensions The current set of dimensions
-     * @return array|null
+     * Create all possible combinations of the configured dimensions.
+     * Will be called recursively to create all possible combinations.
+     *
+     * @param array $inputArray The multidimensional array of the dimensions
+     * @param array $keys The keys of the dimensions
+     *
+     * @return array
      */
-    protected function getNextDimensions(array $dimensions): ?array
+    protected function createDimensionCombinations(array $inputArray, array $combinations = []): array
     {
-        $this->prepareDimensions();
+        $result = [];
 
-        $nextDimensionFound = false;
-        foreach ($this->preparedDimensions as $dimension => $dimensionPresets) {
-            $dimensions[$dimension] = next($dimensionPresets);
+        // Fetch first key and its values
+        $dimensionKey = array_key_first($inputArray);
+        $dimensionValues = $inputArray[$dimensionKey];
 
-            if ($dimensions[$dimension] !== false) {
-                // Found the next dimension, skip further processing
-                $nextDimensionFound = true;
-                break;
+        // Remove the first key from the array, to allow recursion
+        unset($inputArray[$dimensionKey]);
+
+        foreach ($dimensionValues as $dimensionValue) {
+            // Add the current dimansion and its value to the combinations
+            $combinations[$dimensionKey] = $dimensionValue;
+
+            if (empty($inputArray)) {
+                // No more dimensions to process, add the current combination to the result
+                $result[] = $combinations;
+            } else {
+                // Recursively process the next dimension
+                $result = array_merge($result, $this->createDimensionCombinations($inputArray, $combinations));
             }
-
-            // Reset the pointer to the first element and check next dimension for new value
-            $dimensions[$dimension] = reset($dimensionPresets);
         }
 
-        if ($nextDimensionFound === false) {
-            return null;
-        }
-
-        return $dimensions;
+        return $result;
     }
 
     /**
@@ -205,13 +219,9 @@ class DatabaseStorageService
             return $this->formElementsNodeData;
         }
 
-        if (empty($dimensions) && !empty($this->contentDimensions)) {
-            $this->prepareDimensions();
-
-            $dimensions = [];
-            foreach ($this->preparedDimensions as $dimension => $dimensionPresets) {
-                $dimensions[$dimension] = reset($dimensionPresets);
-            }
+        $this->prepareDimensions();
+        if (empty($dimensions)) {
+            $dimensions = reset($this->preparedDimensions);
         }
 
         $contextProperties = [
@@ -243,9 +253,9 @@ class DatabaseStorageService
 
         if (count($finisherNodes) !== 1) {
             // None or more than one Finisher with the same identifier --> could be a Fusion or YAML form or ambiguous --> return
-            $nextDimensions = $this->getNextDimensions($dimensions);
+            $nextDimensions = next($this->preparedDimensions);
 
-            if ($nextDimensions !== null) {
+            if ($nextDimensions !== false) {
                 return $this->getFormElementsNodeData($nextDimensions);
             }
 
@@ -257,9 +267,9 @@ class DatabaseStorageService
         $formNode = $q->parents('[instanceof Neos.Form.Builder:NodeBasedForm]')->get(0);
         if (!$formNode instanceof NodeInterface) {
             // No NodeBasedForm found, return
-            $nextDimensions = $this->getNextDimensions($dimensions);
+            $nextDimensions = next($this->preparedDimensions);
 
-            if ($nextDimensions !== null) {
+            if ($nextDimensions !== false) {
                 return $this->getFormElementsNodeData($nextDimensions);
             }
 
@@ -272,9 +282,9 @@ class DatabaseStorageService
 
         if (empty($formElements)) {
             // No FormElements found, return
-            $nextDimensions = $this->getNextDimensions($dimensions);
+            $nextDimensions = next($this->preparedDimensions);
 
-            if ($nextDimensions !== null) {
+            if ($nextDimensions !== false) {
                 return $this->getFormElementsNodeData($nextDimensions);
             }
 
