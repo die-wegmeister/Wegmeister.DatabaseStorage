@@ -12,6 +12,9 @@
             "Wegmeister\\DatabaseStorage\\": "Classes/"
         }
     },
+    "suggest": {
+        "neos/fusion-form": "New Form rendering with Fusion and AFX"
+    },
     "extra": {
         "neos": {
             "package-key": "Wegmeister.DatabaseStorage"
