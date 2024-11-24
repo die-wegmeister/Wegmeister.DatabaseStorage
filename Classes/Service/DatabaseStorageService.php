@@ -17,6 +17,8 @@ use Neos\ContentRepository\Domain\Model\NodeInterface;
 use Neos\ContentRepository\Domain\Service\ContextFactory;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
+use Neos\Flow\Persistence\Exception\InvalidQueryException;
 use Neos\Flow\Persistence\QueryResultInterface;
 use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Flow\ResourceManagement\ResourceManager;
@@ -421,7 +423,7 @@ class DatabaseStorageService
             return $value;
         }
         if (is_numeric($value)) {
-            return (string) $value;
+            return (string)$value;
         }
         if (is_bool($value)) {
             return ($value ? 'true' : 'false');
@@ -453,25 +455,12 @@ class DatabaseStorageService
     }
 
     /**
-     * Deletes given entry.
-     *
-     * @param DatabaseStorage $entry
-     *
-     * @return void
-     */
-    public function deleteEntry($entry): void
-    {
-        $this->databaseStorageRepository->remove($entry);
-    }
-
-    /**
-     * Gets entries for given storage identifier.
+     * Checks if there are entries for given storage identifier.
      *
      * @param string $storageIdentifier
-     *
-     * @return \Generator
+     * @return int
      */
-    public function getEntriesForCleanup(string $storageIdentifier): \Generator
+    public function getAmountOfEntriesByStorageIdentifier(string $storageIdentifier): int
     {
         $query = $this->databaseStorageRepository->createQuery();
         $constraints = [];
@@ -482,8 +471,22 @@ class DatabaseStorageService
             )
         );
 
-        foreach ($query->execute() as $entry) {
-            yield $entry;
+        return $query->count();
+    }
+
+    /**
+     * Deletes entries of a storage by its identifier and an optional date interval.
+     *
+     * @param string $storageIdentifier Storage identifier
+     * @param \DateInterval $dateInterval Date interval
+     * @return int
+     */
+    public function cleanupByStorageIdentifierAndDateInterval(string $storageIdentifier, \DateInterval $dateInterval): int
+    {
+        try {
+            return $this->databaseStorageRepository->deleteByStorageIdentifierAndDateInterval($storageIdentifier, $dateInterval);
+        } catch (IllegalObjectTypeException|InvalidQueryException $e) {
+            return 0;
         }
     }
 }
