@@ -21,9 +21,9 @@ class DatabaseStorageCommandController extends CommandController
 
     /**
      * @Flow\InjectConfiguration(package="Wegmeister.DatabaseStorage", path="cleanup")
-     * @var array
+     * @var array|null
      */
-    protected array $storageCleanupConfiguration;
+    protected ?array $storageCleanupConfiguration;
 
     /**
      * Deletes entries of configured storages older than configured date interval
