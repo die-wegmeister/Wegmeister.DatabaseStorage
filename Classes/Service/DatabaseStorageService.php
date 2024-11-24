@@ -489,4 +489,15 @@ class DatabaseStorageService
             return 0;
         }
     }
+
+    /**
+     * Get a list of all storage identifiers.
+     *
+     * @param array $excludedStorageIdentifiers
+     * @return array
+     */
+    public function getListOfStorageIdentifiers(array $excludedStorageIdentifiers = []): array
+    {
+        return $this->databaseStorageRepository->getStorageIdentifiers($excludedStorageIdentifiers);
+    }
 }

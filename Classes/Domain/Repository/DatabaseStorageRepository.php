@@ -15,17 +15,28 @@
 
 namespace Wegmeister\DatabaseStorage\Domain\Repository;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
+use Neos\ContentRepository\Domain\Model\NodeData;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Flow\Persistence\Exception\InvalidQueryException;
 use Neos\Flow\Persistence\Repository;
 use Neos\Flow\Persistence\QueryInterface;
+use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 
 /**
  * @Flow\Scope("singleton")
  */
 class DatabaseStorageRepository extends Repository
 {
+    /**
+     * Doctrine's Entity Manager.
+     *
+     * @Flow\Inject
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
 
     /**
      * Update default orderings.
@@ -102,5 +113,26 @@ class DatabaseStorageRepository extends Repository
         }
 
         return $count;
+    }
+
+    /**
+     * Get the list of all storage identifiers. Optionally exclude some.
+     * For performance reasons, this method does not use the ORM.
+     *
+     * @param array $excludedIdentifiers
+     * @return array
+     */
+    public function getStorageIdentifiers(array $excludedIdentifiers = []): array
+    {
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $excludedIdentifiersList = empty($excludedIdentifiers) ? '' : implode(',', $excludedIdentifiers);
+        $queryBuilder->select('n.storageidentifier')
+            ->from(DatabaseStorage::class, 'n')
+            ->distinct(true)
+            ->where('n.storageidentifier NOT IN(:excluded)')
+            ->setParameter('excluded', $excludedIdentifiersList);
+
+        $result = $queryBuilder->getQuery()->getResult();
+        return array_column($result, 'storageidentifier');
     }
 }
