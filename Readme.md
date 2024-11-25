@@ -114,11 +114,11 @@ Run the cleanup command for the configured storages:
 
 You can also run a cleanup command for all existing storages. The command comes with parameters:
 
-| Parameter Name           | Data Type | Description                                                                                                                                                           |
-|--------------------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| date-interval            | string    | Defines which data should be deleted. We use the PHP DateInterval format. You can find more information [here](https://www.php.net/manual/en/class.dateinterval.php). |
-| skip-configured-storages | boolean   | If you have configured storages in your settings, you can skip them with this parameter.                                                                              |
-| remove-files             | boolean   | The PersistentResource that is potentially attached to the database storage entry will be removed as well.                                                            |
+| Parameter Name              | Data Type | Description                                                                                                                                                           |
+|-----------------------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| date-interval               | string    | Defines which data should be deleted. We use the PHP DateInterval format. You can find more information [here](https://www.php.net/manual/en/class.dateinterval.php). |
+| include-configured-storages | boolean   | If you have configured storages in your settings, you can skip them with this parameter.                                                                              |
+| remove-files                | boolean   | The PersistentResource that is potentially attached to the database storage entry will be removed as well.                                                            |
 
 
 
