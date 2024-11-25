@@ -72,12 +72,7 @@ class DatabaseStorageRepository extends Repository
     public function findStorageidentifiers()
     {
         if ($this->identifiers === []) {
-            foreach ($this->findAll() as $item) {
-                if ($this->currentIdentifier !== $item->getStorageidentifier()) {
-                    $this->identifiers[] = $item->getStorageidentifier();
-                    $this->currentIdentifier = $item->getStorageidentifier();
-                }
-            }
+            $this->identifiers = $this->getStorageIdentifiers();
         }
 
         return $this->identifiers;
@@ -138,5 +133,25 @@ class DatabaseStorageRepository extends Repository
 
         $result = $queryBuilder->getQuery()->getResult();
         return array_column($result, 'storageidentifier');
+    }
+
+    /**
+     * Checks if there are entries for given storage identifier.
+     *
+     * @param string $storageIdentifier
+     * @return int
+     */
+    public function getAmountOfEntriesByStorageIdentifier(string $storageIdentifier): int
+    {
+        $query = $this->databaseStorageRepository->createQuery();
+        $constraints = [];
+        $constraints[] = $query->equals('storageidentifier', $storageIdentifier);
+        $query->matching(
+            $query->logicalAnd(
+                $constraints
+            )
+        );
+
+        return $query->count();
     }
 }

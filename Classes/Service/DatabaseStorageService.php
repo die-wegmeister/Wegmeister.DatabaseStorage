@@ -462,16 +462,7 @@ class DatabaseStorageService
      */
     public function getAmountOfEntriesByStorageIdentifier(string $storageIdentifier): int
     {
-        $query = $this->databaseStorageRepository->createQuery();
-        $constraints = [];
-        $constraints[] = $query->equals('storageidentifier', $storageIdentifier);
-        $query->matching(
-            $query->logicalAnd(
-                $constraints
-            )
-        );
-
-        return $query->count();
+        return $this->databaseStorageRepository->getAmountOfEntriesByStorageIdentifier($storageIdentifier);
     }
 
     /**
