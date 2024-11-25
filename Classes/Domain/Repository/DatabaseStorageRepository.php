@@ -15,6 +15,7 @@
 
 namespace Wegmeister\DatabaseStorage\Domain\Repository;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Neos\ContentRepository\Domain\Model\NodeData;
@@ -124,13 +125,16 @@ class DatabaseStorageRepository extends Repository
      */
     public function getStorageIdentifiers(array $excludedIdentifiers = []): array
     {
+        if (empty($excludedIdentifiers)) {
+            // If no excluded identifiers are given, we need to add an empty string to the array
+            $excludedIdentifiers[] = '';
+        }
         $queryBuilder = $this->entityManager->createQueryBuilder();
-        $excludedIdentifiersList = empty($excludedIdentifiers) ? '' : implode(',', $excludedIdentifiers);
         $queryBuilder->select('n.storageidentifier')
             ->from(DatabaseStorage::class, 'n')
             ->distinct(true)
             ->where('n.storageidentifier NOT IN(:excluded)')
-            ->setParameter('excluded', $excludedIdentifiersList);
+            ->setParameter('excluded', $excludedIdentifiers, Connection::PARAM_STR_ARRAY);
 
         $result = $queryBuilder->getQuery()->getResult();
         return array_column($result, 'storageidentifier');
