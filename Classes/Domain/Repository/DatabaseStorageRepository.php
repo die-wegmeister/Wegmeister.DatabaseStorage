@@ -17,13 +17,13 @@ namespace Wegmeister\DatabaseStorage\Domain\Repository;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\QueryBuilder;
-use Neos\ContentRepository\Domain\Model\NodeData;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Flow\Persistence\Exception\InvalidQueryException;
 use Neos\Flow\Persistence\Repository;
 use Neos\Flow\Persistence\QueryInterface;
+use Neos\Flow\ResourceManagement\PersistentResource;
+use Neos\Flow\ResourceManagement\ResourceManager;
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 
 /**
@@ -50,18 +50,17 @@ class DatabaseStorageRepository extends Repository
     ];
 
     /**
-     * Currently used storage identifier.
-     *
-     * @var string
-     */
-    protected $currentIdentifier = false;
-
-    /**
      * List of identifiers.
      *
      * @var array
      */
     protected $identifiers = [];
+
+    /**
+     * @Flow\Inject
+     * @var ResourceManager
+     */
+    protected $resourceManager;
 
 
     /**
@@ -83,11 +82,12 @@ class DatabaseStorageRepository extends Repository
      *
      * @param string $storageIdentifier Storage identifier
      * @param \DateInterval|null $dateInterval Date interval
+     * @param bool $removeAttachedResource
      * @return int
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      */
-    public function deleteByStorageIdentifierAndDateInterval(string $storageIdentifier, \DateInterval $dateInterval = null): int
+    public function deleteByStorageIdentifierAndDateInterval(string $storageIdentifier, \DateInterval $dateInterval = null, $removeAttachedResource = false): int
     {
         $query = $this->createQuery();
         $constraints = [
@@ -104,11 +104,37 @@ class DatabaseStorageRepository extends Repository
         $entries = $query->execute();
         $count = 0;
         foreach ($entries as $entry) {
+            if ($removeAttachedResource) {
+                $this->removeResourceFromEntry($entry);
+            }
             $this->remove($entry);
             $count++;
         }
 
         return $count;
+    }
+
+    /**
+     * Checks if the given storage entry has a property with a resource.
+     * If a resource property is found, the resource will be deleted.
+     *
+     * @param DatabaseStorage $entry
+     * @return void
+     */
+    protected function removeResourceFromEntry(DatabaseStorage $entry): void
+    {
+        try {
+            foreach ($entry->getProperties() as $property) {
+                if (!$property instanceof PersistentResource) {
+                    continue;
+                }
+
+                $this->resourceManager->deleteResource($property);
+            }
+        } catch (\Doctrine\ORM\EntityNotFoundException $exception) {
+            // Maybe the entry is already deleted and therefore not found
+            return;
+        }
     }
 
     /**
@@ -143,7 +169,7 @@ class DatabaseStorageRepository extends Repository
      */
     public function getAmountOfEntriesByStorageIdentifier(string $storageIdentifier): int
     {
-        $query = $this->databaseStorageRepository->createQuery();
+        $query = $this->createQuery();
         $constraints = [];
         $constraints[] = $query->equals('storageidentifier', $storageIdentifier);
         $query->matching(

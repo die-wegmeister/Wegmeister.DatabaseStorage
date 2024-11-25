@@ -470,12 +470,13 @@ class DatabaseStorageService
      *
      * @param string $storageIdentifier Storage identifier
      * @param \DateInterval $dateInterval Date interval
+     * @param bool $removeFiles
      * @return int
      */
-    public function cleanupByStorageIdentifierAndDateInterval(string $storageIdentifier, \DateInterval $dateInterval): int
+    public function cleanupByStorageIdentifierAndDateInterval(string $storageIdentifier, \DateInterval $dateInterval, bool $removeFiles = false): int
     {
         try {
-            return $this->databaseStorageRepository->deleteByStorageIdentifierAndDateInterval($storageIdentifier, $dateInterval);
+            return $this->databaseStorageRepository->deleteByStorageIdentifierAndDateInterval($storageIdentifier, $dateInterval, $removeFiles);
         } catch (IllegalObjectTypeException|InvalidQueryException $e) {
             return 0;
         }

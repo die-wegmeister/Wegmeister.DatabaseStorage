@@ -49,9 +49,10 @@ class DatabaseStorageCommandController extends CommandController
      * You can also skip the configured storages.
      *
      * @param string $dateInterval
+     * @param bool $removeFiles
      * @param bool $includeConfiguredStorages
      */
-    public function cleanupAllStoragesCommand(string $dateInterval, bool $includeConfiguredStorages = false): void
+    public function cleanupAllStoragesCommand(string $dateInterval, $removeFiles = false, bool $includeConfiguredStorages = false): void
     {
         $this->outputFormatted('<b>Cleanup of all storages</b>');
         $this->outputLine('');
@@ -65,7 +66,7 @@ class DatabaseStorageCommandController extends CommandController
 
         // Check if the date interval is valid
         try {
-            $dateIntervalFromString =  new DateInterval($dateInterval);
+            $dateIntervalFromString = new DateInterval($dateInterval);
         } catch (\Exception $exception) {
             $this->outputFormatted(
                 'Invalid date interval value, please check the format (https://www.php.net/manual/de/class.dateinterval.php).'
@@ -81,7 +82,7 @@ class DatabaseStorageCommandController extends CommandController
         }
         $storageIdentifiers = $this->databaseStorageService->getListOfStorageIdentifiers($skippedStorages);
 
-        $results = $this->getCleanupResultsForStorageIdentifier($storageIdentifiers, $dateIntervalFromString, $daysToKeepData);
+        $results = $this->getCleanupResultsForStorageIdentifier($storageIdentifiers, $dateIntervalFromString, $daysToKeepData, $removeFiles);
         $this->output->outputTable($results, ['storageIdentifier', 'messages'], 'Cleanup results');
     }
 
@@ -94,24 +95,31 @@ class DatabaseStorageCommandController extends CommandController
      * @param int $daysToKeepData
      * @return array
      */
-    protected function getCleanupResultsForStorageIdentifier(array $storageIdentifiers, ?DateInterval $dateInterval = null, int $daysToKeepData = -1): array
+    protected function getCleanupResultsForStorageIdentifier(array $storageIdentifiers, ?DateInterval $dateInterval = null, int $daysToKeepData = -1, $removeFiles = false): array
     {
         $results = [];
         foreach ($storageIdentifiers as $storageIdentifier) {
             $results[$storageIdentifier] = ['storageIdentifier' => $storageIdentifier, 'messages' => ''];
+            $newDateInterval = $dateInterval;
 
             // use the storage cleanup configuration if no date interval is provided
-            if ($dateInterval === null) {
+            if ($newDateInterval === null) {
                 // Check if the date interval is valid
                 try {
-                    $dateInterval = $this->getDateIntervalFromConfiguration($storageIdentifier);
+                    $newDateInterval = $this->getDateIntervalFromConfiguration($storageIdentifier);
                 } catch (\Exception $exception) {
                     $results[$storageIdentifier]['messages'] .= $exception->getMessage() . PHP_EOL;
                     continue;
                 }
 
                 // Check if we have entries for the storage identifier
-                $daysToKeepData = $this->getDaysToKeepFromConfiguredInterval($dateInterval);
+                $daysToKeepData = $this->getDaysToKeepFromConfiguredInterval($newDateInterval);
+
+                // Use removeFiles from configuration if not provided
+                $removeFiles = filter_var(
+                    $this->storageCleanupConfiguration[$storageIdentifier]['removeFiles'] ?? false,
+                    FILTER_VALIDATE_BOOLEAN
+                );
             }
 
             $amountOfEntries = $this->databaseStorageService->getAmountOfEntriesByStorageIdentifier($storageIdentifier);
@@ -122,7 +130,7 @@ class DatabaseStorageCommandController extends CommandController
 
             // Cleanup the storage
             $results[$storageIdentifier]['messages'] .= vsprintf('Removing entries from storage "%s" older than %s days.', [$storageIdentifier, $daysToKeepData]) . PHP_EOL;
-            $amountOfOutdatedEntries = $this->databaseStorageService->cleanupByStorageIdentifierAndDateInterval($storageIdentifier, $dateInterval);
+            $amountOfOutdatedEntries = $this->databaseStorageService->cleanupByStorageIdentifierAndDateInterval($storageIdentifier, $newDateInterval, $removeFiles);
             $results[$storageIdentifier]['messages'] .= vsprintf('Removed %s entries from storage "%s" (%s entries in total).', [$amountOfOutdatedEntries, $storageIdentifier, $amountOfEntries]);
         }
 
