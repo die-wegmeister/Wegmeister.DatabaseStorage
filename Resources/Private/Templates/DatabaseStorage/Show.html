@@ -57,6 +57,10 @@
                         <div class="neos-modal-footer">
                           <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
                           <f:form action="delete" object="{entry}" objectName="entry" class="neos-inline">
+                            <label>
+                              <f:form.checkbox name="removeAttachedResources" value="1" />
+                              {neos:backend.translate(id: 'storage.deleteModal.removeAttachedResources')}
+                            </label>
                             <button type="submit" class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'storage.deleteSingleModal.buttonTitle')}">
                               {neos:backend.translate(id: 'storage.deleteSingleModal.buttonTitle')}
                             </button>

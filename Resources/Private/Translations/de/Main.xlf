@@ -71,6 +71,10 @@
 				<source>This will delete all entries for identifier "{0}" and cannot be undone. Your data will be gone!</source>
 				<target>Hierdurch werden alle Einträge der ID "{0}" entgültig gelöscht. Dieser Vorgang kann nicht rückgangig gemacht werden.</target>
 			</trans-unit>
+			<trans-unit id="storage.deleteModal.removeAttachedResources" xml:space="preserve">
+				<source>Remove attached resources</source>
+				<target>Zugehörige Dateien löschen</target>
+			</trans-unit>
 			<trans-unit id="storage.deleteModal.buttonTitle" xml:space="preserve">
 				<source>Delete entries</source>
 				<target>Einträge löschen</target>

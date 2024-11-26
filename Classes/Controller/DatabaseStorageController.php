@@ -158,10 +158,12 @@ class DatabaseStorageController extends ActionController
      *
      * @return void
      */
-    public function deleteAction(DatabaseStorage $entry)
-    {
+    public function deleteAction(
+        DatabaseStorage $entry,
+        bool $removeAttachedResources = false
+    ) {
         $identifier = $entry->getStorageidentifier();
-        $this->databaseStorageRepository->remove($entry);
+        $this->databaseStorageRepository->remove($entry, $removeAttachedResources);
         $this->addFlashMessage(
             $this->translator->translateById(
                 'storage.flashmessage.entryRemoved',
@@ -180,16 +182,17 @@ class DatabaseStorageController extends ActionController
      *
      * @param string $identifier The storage identifier for the entries to be removed.
      * @param bool $redirect Redirect to index?
+     * @param bool $removeAttachedResource Remove attached resources?
      *
      * @return void
      */
-    public function deleteAllAction(string $identifier, bool $redirect = false)
+    public function deleteAllAction(string $identifier, bool $redirect = false, bool $removeAttachedResources = false)
     {
-        $count = 0;
-        foreach ($this->databaseStorageRepository->findByStorageidentifier($identifier) as $entry) {
-            $this->databaseStorageRepository->remove($entry);
-            $count++;
-        }
+        $count = $this->databaseStorageRepository->deleteByStorageIdentifierAndDateInterval(
+            $identifier,
+            null,
+            $removeAttachedResources
+        );
 
         $this->view->assign('identifier', $identifier);
         $this->view->assign('count', $count);
@@ -310,5 +313,4 @@ class DatabaseStorageController extends ActionController
         $writer->save('php://output');
         exit;
     }
-
 }
