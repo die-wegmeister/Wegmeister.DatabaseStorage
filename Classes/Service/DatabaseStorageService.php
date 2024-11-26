@@ -17,17 +17,25 @@ use Neos\ContentRepository\Domain\Model\NodeInterface;
 use Neos\ContentRepository\Domain\Service\ContextFactory;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
+use Neos\Flow\Persistence\Exception\InvalidQueryException;
 use Neos\Flow\Persistence\QueryResultInterface;
 use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Neos\Domain\Service\SiteService;
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
+use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
 
 /**
  * @Flow\Scope("singleton")
  */
 class DatabaseStorageService
 {
+    /**
+     * @var DatabaseStorageRepository
+     * @Flow\Inject
+     */
+    protected $databaseStorageRepository;
 
     /**
      * @var array
@@ -415,7 +423,7 @@ class DatabaseStorageService
             return $value;
         }
         if (is_numeric($value)) {
-            return (string) $value;
+            return (string)$value;
         }
         if (is_bool($value)) {
             return ($value ? 'true' : 'false');
@@ -444,5 +452,44 @@ class DatabaseStorageService
         }
 
         return '';
+    }
+
+    /**
+     * Checks if there are entries for given storage identifier.
+     *
+     * @param string $storageIdentifier
+     * @return int
+     */
+    public function getAmountOfEntriesByStorageIdentifier(string $storageIdentifier): int
+    {
+        return $this->databaseStorageRepository->getAmountOfEntriesByStorageIdentifier($storageIdentifier);
+    }
+
+    /**
+     * Deletes entries of a storage by its identifier and an optional date interval.
+     *
+     * @param string $storageIdentifier Storage identifier
+     * @param \DateInterval $dateInterval Date interval
+     * @param bool $removeFiles
+     * @return int
+     */
+    public function cleanupByStorageIdentifierAndDateInterval(string $storageIdentifier, \DateInterval $dateInterval, bool $removeFiles = false): int
+    {
+        try {
+            return $this->databaseStorageRepository->deleteByStorageIdentifierAndDateInterval($storageIdentifier, $dateInterval, $removeFiles);
+        } catch (IllegalObjectTypeException|InvalidQueryException $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get a list of all storage identifiers.
+     *
+     * @param array $excludedStorageIdentifiers
+     * @return array
+     */
+    public function getListOfStorageIdentifiers(array $excludedStorageIdentifiers = []): array
+    {
+        return $this->databaseStorageRepository->getStorageIdentifiers($excludedStorageIdentifiers);
     }
 }
