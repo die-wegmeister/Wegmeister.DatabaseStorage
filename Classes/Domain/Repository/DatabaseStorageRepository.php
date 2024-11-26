@@ -54,9 +54,9 @@ class DatabaseStorageRepository extends Repository
     /**
      * List of identifiers.
      *
-     * @var array
+     * @var ?array
      */
-    protected $identifiers = [];
+    protected $identifiers = null;
 
     /**
      * @Flow\Inject
@@ -72,7 +72,7 @@ class DatabaseStorageRepository extends Repository
      */
     public function findStorageidentifiers()
     {
-        if ($this->identifiers === []) {
+        if ($this->identifiers === null) {
             $this->identifiers = $this->getStorageIdentifiers();
         }
 
