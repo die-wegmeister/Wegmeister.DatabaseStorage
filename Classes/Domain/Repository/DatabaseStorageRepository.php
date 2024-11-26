@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Repository to load database storage entries.
  *
@@ -17,6 +18,7 @@ namespace Wegmeister\DatabaseStorage\Domain\Repository;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityNotFoundException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Flow\Persistence\Exception\InvalidQueryException;
