@@ -1,0 +1,5 @@
+# Add the extended nodetypes of the Sitegeist.PaperTiger
+# to prevent errors if Sitegeist.PaperTiger is
+# not in the requirements.
+'Sitegeist.PaperTiger:Action':
+  abstract: true
