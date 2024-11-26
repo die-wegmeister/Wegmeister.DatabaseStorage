@@ -89,8 +89,11 @@ class DatabaseStorageRepository extends Repository
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      */
-    public function deleteByStorageIdentifierAndDateInterval(string $storageIdentifier, \DateInterval $dateInterval = null, $removeAttachedResource = false): int
-    {
+    public function deleteByStorageIdentifierAndDateInterval(
+        string $storageIdentifier,
+        \DateInterval $dateInterval = null,
+        $removeAttachedResources = false
+    ): int {
         $query = $this->createQuery();
         $constraints = [
             $query->equals('storageidentifier', $storageIdentifier)
@@ -106,10 +109,7 @@ class DatabaseStorageRepository extends Repository
         $entries = $query->execute();
         $count = 0;
         foreach ($entries as $entry) {
-            if ($removeAttachedResource) {
-                $this->removeResourceFromEntry($entry);
-            }
-            $this->remove($entry);
+            $this->remove($entry, $removeAttachedResources);
             $count++;
         }
 
@@ -117,26 +117,36 @@ class DatabaseStorageRepository extends Repository
     }
 
     /**
-     * Checks if the given storage entry has a property with a resource.
-     * If a resource property is found, the resource will be deleted.
+     * Removes an object from this repository.
+     * 
+     * If $removeAttachedResources is true, checks if the given storage entry
+     * has a property with a resource. If a resource property is found,
+     * the resource will be deleted.
      *
-     * @param DatabaseStorage $entry
+     * @param object $object The object to remove
+     * @param bool $removeAttachedResources Also remove all attached resources?
      * @return void
+     * @throws IllegalObjectTypeException
+     * @api
      */
-    protected function removeResourceFromEntry(DatabaseStorage $entry): void
+    public function remove($entry, bool $removeAttachedResources = false): void
     {
-        try {
+        if ($removeAttachedResources) {
             foreach ($entry->getProperties() as $property) {
                 if (!$property instanceof PersistentResource) {
                     continue;
                 }
 
-                $this->resourceManager->deleteResource($property);
+                try {
+                    $this->resourceManager->deleteResource($property);
+                } catch (EntityNotFoundException $exception) {
+                    // Maybe the entry is already deleted and therefore not found
+                    return;
+                }
             }
-        } catch (\Doctrine\ORM\EntityNotFoundException $exception) {
-            // Maybe the entry is already deleted and therefore not found
-            return;
         }
+
+        parent::remove($entry);
     }
 
     /**
