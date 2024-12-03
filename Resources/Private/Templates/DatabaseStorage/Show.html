@@ -4,21 +4,32 @@
 
 <f:section name="Title">
 	<p><f:link.action action="index" class="neos-button">{neos:backend.translate(id: 'storage.backToIdentifiers')}</f:link.action></p>
-	<div class="neos-row-fluid">
-		<legend>
-			{neos:backend.translate(id: 'storage.databaseStorage')} - [{f:if(condition: '{entries -> f:count()} > 0', then: '{entries -> f:count()}')}] {neos:backend.translate(id: 'storage.entriesForX', arguments: {0: identifier})}
-		</legend>
-	</div>
+    <h1>
+        {neos:backend.translate(id: 'storage.databaseStorage')} - [{f:if(condition: '{entries -> f:count()} > 0', then: '{entries -> f:count()}')}] {neos:backend.translate(id: 'storage.entriesForX', arguments: {0: identifier})}
+    </h1>
 </f:section>
 
 <f:section name="Content">
   <style>
+    .neos h1 {font-size: 150%; margin: 1em 0;}
     .scrollable-table {overflow-x: auto; width: 100%;}
     .scrollable-table .neos-table {min-width: 100%; max-width: none;}
     .size-sm {width: 50px;}
     .neos.neos-module table.neos-table td,
     .neos.neos-module table.neos-table th {line-height: 24px; padding: 8px 16px;}
     .neos.neos-module table td a {text-decoration: underline;}
+    .neos .buttons {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 1em;
+    }
+    .buttons .neos-button {
+      height: auto;
+      line-height: 1.2;
+      margin-left: 0!important;
+      padding: 0.8em 1em;
+    }
   </style>
 
   <div class="neos-row-fluid">
@@ -55,15 +66,20 @@
                           </div>
                         </div>
                         <div class="neos-modal-footer">
-                          <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
-                          <f:form action="delete" object="{entry}" objectName="entry" class="neos-inline">
-                            <label>
-                              <f:form.checkbox name="removeAttachedResources" value="1" />
-                              {neos:backend.translate(id: 'storage.deleteModal.removeAttachedResources')}
-                            </label>
-                            <button type="submit" class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'storage.deleteSingleModal.buttonTitle')}">
-                              {neos:backend.translate(id: 'storage.deleteSingleModal.buttonTitle')}
-                            </button>
+                          <f:form action="delete" object="{entry}" objectName="entry">
+                            <div>
+                              <label class="neos-checkbox">
+                                <f:form.checkbox name="removeAttachedResources" value="1" />
+                                <span></span>
+                                {neos:backend.translate(id: 'storage.deleteModal.removeAttachedResources')}
+                              </label>
+                            </div>
+                            <div class="buttons">
+                              <a href="#" class="neos-button" data-dismiss="modal">{neos:backend.translate(id: 'cancel', value: 'Cancel', package: 'Neos.Neos')}</a>
+                              <button type="submit" class="neos-button neos-button-danger" title="{neos:backend.translate(id: 'storage.deleteSingleModal.buttonTitle')}">
+                                {neos:backend.translate(id: 'storage.deleteSingleModal.buttonTitle')}
+                              </button>
+                            </div>
                           </f:form>
                         </div>
                       </div>

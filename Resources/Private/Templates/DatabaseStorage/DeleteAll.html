@@ -1,9 +1,12 @@
 {namespace neos=Neos\Neos\ViewHelpers}
 <f:layout name="Default" />
 
-<f:section name="title">{neos:backend.translate(id: 'storage.databaseStorage')} - {neos:backend.translate(id: 'storage.deleteAll.deleteEntries')}</f:section>
+<f:section name="title"><h1>{neos:backend.translate(id: 'storage.databaseStorage')} - {neos:backend.translate(id: 'storage.deleteAll.deleteEntries')}</h1></f:section>
 
 <f:section name="content">
+  <style>
+    .neos h1 {font-size: 150%; margin: 1em 0;}
+  </style>
   <section>
     <h3>{neos:backend.translate(id: 'storage.deleteAll.successTitle')}</h3>
     <p>{neos:backend.translate(id: 'storage.deleteAll.successTitle', arguments: {0: count, 1: identifier})}</p>
