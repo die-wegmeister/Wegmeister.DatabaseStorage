@@ -55,6 +55,9 @@
 			<trans-unit id="storage.deleteModal.text" xml:space="preserve">
 				<source>This will delete all entries for identifier "{0}" and cannot be undone. Your data will be gone!</source>
 			</trans-unit>
+			<trans-unit id="storage.deleteModal.removeAttachedResources" xml:space="preserve">
+				<source>Remove attached resources</source>
+			</trans-unit>
 			<trans-unit id="storage.deleteModal.buttonTitle" xml:space="preserve">
 				<source>Delete entries</source>
 			</trans-unit>
