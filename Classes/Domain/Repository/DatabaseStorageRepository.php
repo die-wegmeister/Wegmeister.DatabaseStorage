@@ -140,8 +140,10 @@ class DatabaseStorageRepository extends Repository
                 try {
                     $this->resourceManager->deleteResource($property);
                 } catch (EntityNotFoundException $exception) {
-                    // Maybe the entry is already deleted and therefore not found
-                    return;
+                    // Maybe the entry is already deleted and therefore not found.
+                    // Therefore we will ignore this exception and continue
+                    // with the next property.
+                    continue;
                 }
             }
         }
