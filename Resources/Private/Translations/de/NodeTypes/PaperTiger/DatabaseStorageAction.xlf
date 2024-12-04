@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file original="" source-language="en" target-language="de" datatype="plaintext">
+		<body>
+			<trans-unit id="ui.label" xml:space="preserve">
+				<source>Database Storage</source>
+				<target>Datenbank-Speicher</target>
+			</trans-unit>
+			<trans-unit id="properties.identifier" xml:space="preserve">
+				<source>Table name</source>
+				<target>Tabellenname</target>
+			</trans-unit>
+			<trans-unit id="properties.identifier.ui.help.message" xml:space="preserve">
+				<source>The name used to store all entered forms in. Items of the same table name will be grouped together. Could theoretically be used on multiple forms, but try not to do that, unless you know what you are doing :)</source>
+				<target>Der Name, unter dem alle abgeschickten Formulare gespeichert werden. Einträge mit demselben Tabellennamen werden in Gruppen zusammengefasst. Theoretisch können mehrere Formulare den selben Namen verwenden – das sollte aber vermieden werden, sofern Sie sich hier unsicher sind :)</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

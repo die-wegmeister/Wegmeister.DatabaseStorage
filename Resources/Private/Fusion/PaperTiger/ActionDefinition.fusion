@@ -1,0 +1,11 @@
+prototype(Wegmeister.DatabaseStorage:PaperTiger.DatabaseStorageAction.Definition) < prototype(Neos.Fusion:Component) {
+    identifier = ${q(node).property('identifier')}
+
+    renderer = Sitegeist.PaperTiger:Action {
+        type = '\\Wegmeister\\DatabaseStorage\\FusionForm\\Runtime\\Action\\DatabaseStorageAction'
+        options {
+            identifier = ${props.identifier}
+            formValues = ${data}
+        }
+    }
+}

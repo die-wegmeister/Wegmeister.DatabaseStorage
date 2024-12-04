@@ -13,7 +13,8 @@
         }
     },
     "suggest": {
-        "neos/fusion-form": "New Form rendering with Fusion and AFX"
+        "neos/fusion-form": "New Form rendering with Fusion and AFX",
+        "sitegeist/papertiger": "Form builder for Neos CMS based on Neos.Fusion.Form"
     },
     "extra": {
         "neos": {

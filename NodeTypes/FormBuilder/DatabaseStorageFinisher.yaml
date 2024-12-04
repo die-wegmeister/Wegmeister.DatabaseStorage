@@ -1,13 +1,3 @@
-# Add the extended nodetypes of the Neos.Form.Builder
-# to prevent errors if the new Neos Form-Builder is
-# not in the requirements.
-'Neos.Form.Builder:AbstractFinisher':
-  abstract: true
-
-'Neos.Form.Builder:IdentifierMixin':
-  abstract: true
-
-
 'Wegmeister.DatabaseStorage:DatabaseStorageFinisher':
   superTypes:
     'Neos.Form.Builder:AbstractFinisher': true
