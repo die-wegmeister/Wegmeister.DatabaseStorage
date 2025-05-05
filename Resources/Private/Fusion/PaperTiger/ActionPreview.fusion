@@ -1,0 +1,11 @@
+prototype(Wegmeister.DatabaseStorage:PaperTiger.DatabaseStorageAction.Preview) < prototype(Neos.Fusion:Component) {
+    identifier = ${q(node).property('identifier')}
+    title = ${Translation.translate('Wegmeister.DatabaseStorage:NodeTypes.PaperTiger.DatabaseStorageAction:properties.identifier')}
+
+    renderer = afx`
+        <dl class="papertiger-action-email__list">
+            <dt>{props.title}</dt>
+            <dd>{props.identifier}</dd>
+        </dl>
+    `
+}

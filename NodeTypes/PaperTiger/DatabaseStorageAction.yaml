@@ -1,0 +1,23 @@
+Wegmeister.DatabaseStorage:PaperTiger.DatabaseStorageAction:
+  superTypes:
+    'Sitegeist.PaperTiger:Action': true
+  ui:
+    label: 'i18n'
+    icon: 'icon-database'
+  properties:
+    identifier:
+      type: string
+      ui:
+        label: 'i18n'
+        showInCreationDialog: true
+        inspector:
+          group: 'form'
+        help:
+          message: 'i18n'
+      validation:
+        'Neos.Neos/Validation/NotEmptyValidator': []
+        'Neos.Neos/Validation/StringLengthValidator':
+          maximum: 255
+        'Neos.Neos/Validation/RegularExpressionValidator':
+          regularExpression: '/^[a-z0-9\-]+$/i'
+          validationErrorMessage: 'Only letters, numbers and dashes are allowed.'
