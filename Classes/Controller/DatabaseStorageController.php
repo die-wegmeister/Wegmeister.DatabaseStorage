@@ -18,9 +18,11 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\I18n\Translator;
 use Neos\Flow\Mvc\Controller\ActionController;
 
-use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
 
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
@@ -236,12 +238,14 @@ class DatabaseStorageController extends ActionController
 
         $spreadsheet = new Spreadsheet();
 
-        $spreadsheet->getProperties()->setCreator($this->settings['creator'])->setTitle(
-            $this->settings['title']
-        )->setSubject($this->settings['subject']);
+        $spreadsheet->getProperties()
+            ->setCreator($this->settings['creator'])
+            ->setTitle($this->settings['title'])
+            ->setSubject($this->settings['subject']);
 
         $spreadsheet->setActiveSheetIndex(0);
-        $spreadsheet->getActiveSheet()->setTitle($this->settings['title']);
+        $activeSheet = $spreadsheet->getActiveSheet();
+        $activeSheet->setTitle($this->settings['title']);
 
         $formElementLabels = $this->databaseStorageService->getFormElementLabels(
             $entries
@@ -254,10 +258,20 @@ class DatabaseStorageController extends ActionController
             $columns++;
         }
 
-        $dataArray[] = $formElementLabels;
+        $row = 1;
+        $this->setRowValues($activeSheet, $row, $formElementLabels);
+
+        // Set styles for titles (bold and centered)
+        $lastColumnLetter = $this->getColumnLetter($columns - 1);
+        $columnStyle = $activeSheet->getStyle('A1:' . $lastColumnLetter . '1');
+        $columnStyle->getFont()->setBold(true);
+        $columnStyle->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
 
         /** @var DatabaseStorage $entry */
         foreach ($entries as $entry) {
+            $row++;
             $values = [];
             foreach ($formElementLabels as $formElementLabel) {
                 $values[$formElementLabel] = $this->databaseStorageService->getValueFromEntryProperty(
@@ -268,26 +282,7 @@ class DatabaseStorageController extends ActionController
             if ($exportDateTime) {
                 $values['DateTime'] = $entry->getDateTime()->format($this->settings['datetimeFormat']);
             }
-            $dataArray[] = $values;
-        }
-
-        $spreadsheet->getActiveSheet()->fromArray($dataArray);
-
-        // Set headlines bold
-        $prefixIndex = 64;
-        $prefixKey = '';
-        for ($i = 0; $i < $columns; $i++) {
-            $index = $i % 26;
-            $columnStyle = $spreadsheet->getActiveSheet()->getStyle($prefixKey . chr(65 + $index) . '1');
-            $columnStyle->getFont()->setBold(true);
-            $columnStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(
-                Alignment::VERTICAL_CENTER
-            );
-
-            if ($index + 1 > 25) {
-                $prefixIndex++;
-                $prefixKey = chr($prefixIndex);
-            }
+            $this->setRowValues($activeSheet, $row, $values);
         }
 
         if (ini_get('zlib.output_compression')) {
@@ -312,5 +307,43 @@ class DatabaseStorageController extends ActionController
         $writer = IOFactory::createWriter($spreadsheet, $writerType);
         $writer->save('php://output');
         exit;
+    }
+
+    /**
+     * Set values of a row. Use explicit string type to prevent calculation of formulas.
+     *
+     * @param Worksheet $sheet The sheet to set the values on.
+     * @param int       $row The row to set the values on.
+     * @param string[]  $values The values to set.
+     * @return void
+     */
+    protected function setRowValues(Worksheet $sheet, int $row, array $values)
+    {
+        $index = 0;
+        foreach ($values as $value) {
+            $letter = $this->getColumnLetter($index);
+            $sheet->setCellValueExplicit(
+                $letter . $row,
+                $value,
+                DataType::TYPE_STRING
+            );
+            $index++;
+        }
+    }
+
+    /**
+     * Get column letter for a given index.
+     * @param int $index The index to get the prefix for.
+     * @return string
+     */
+    protected function getColumnLetter(int $index): string
+    {
+        $prefixLetter = '';
+        if ($index > 25) {
+            $prefixLetter = chr(floor($index / 26) + 64);
+        }
+        $letter = $prefixLetter . chr(($index % 26) + 65);
+
+        return $letter;
     }
 }
