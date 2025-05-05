@@ -17,6 +17,7 @@
 namespace Wegmeister\DatabaseStorage\Finishers;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Form\Core\Model\AbstractFinisher;
 use Neos\Form\Exception\FinisherException;
 use Neos\Media\Domain\Model\ResourceBasedInterface;
@@ -42,6 +43,12 @@ class DatabaseStorageFinisher extends AbstractFinisher
      * @var DatabaseStorageService
      */
     protected $databaseStorageService;
+
+    /**
+     * @Flow\Inject
+     * @var PersistenceManagerInterface
+     */
+    protected $persistenceManager;
 
     /**
      * Executes this finisher
@@ -79,5 +86,14 @@ class DatabaseStorageFinisher extends AbstractFinisher
             ->setDateTime(new \DateTime());
 
         $this->databaseStorageRepository->add($dbStorage);
+
+        // Persist the object to the database, so we can get the identifier...
+        $this->persistenceManager->persistAll();
+
+        // ... then get the identifier
+        $dbIdentifier = $this->persistenceManager->getIdentifierByObject($dbStorage);
+
+        // ... and add it to the form state
+        $formRuntime->getFormState()->setFormValue('databaseStorageIdentifier', $dbIdentifier);
     }
 }

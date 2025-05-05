@@ -12,7 +12,13 @@ composer require wegmeister/databasestorage
 
 ## Usage
 
-You can add the DatabaseStorage Finisher in the following ways:
+You can add the DatabaseStorage Finisher in the following ways.
+
+> [!NOTE]
+> Since version `2.1.0` the DatabaseStorage Finisher will add a new form value
+> `databaseStorageIdentifier` that can be used in further finishers.
+> This value is the identifier of the database entry and can be helpful if you 
+> need to reference the entry in other finishers.
 
 ### Add DatabaseStorage using YAML definitions
 
