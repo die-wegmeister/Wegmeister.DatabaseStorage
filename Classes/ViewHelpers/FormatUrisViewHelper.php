@@ -107,7 +107,7 @@ class FormatUrisViewHelper extends AbstractViewHelper
 
         return sprintf(
             'preg_replace(\'%1$s\', \'<a href="$0" target="_blank" rel="noopener noreferrer">$0</a>\', %2$s)',
-            str_replace('\'', '\\', self::$uriPattern),
+            str_replace("'", "\\'", self::$uriPattern),
             $valueVariableName
         );
     }
