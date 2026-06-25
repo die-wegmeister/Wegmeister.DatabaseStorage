@@ -170,6 +170,7 @@ class DatabaseStorageRepository extends Repository
             ->from(DatabaseStorage::class, 'n')
             ->distinct(true)
             ->where('n.storageidentifier NOT IN(:excluded)')
+            ->orderBy('n.storageidentifier', 'ASC')
             ->setParameter('excluded', $excludedIdentifiers, Connection::PARAM_STR_ARRAY);
 
         $result = $queryBuilder->getQuery()->getResult();
