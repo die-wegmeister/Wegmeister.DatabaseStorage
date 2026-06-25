@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file original="" product-name="Wegmeister.DatabaseStorage" source-language="en" datatype="plaintext">
+		<body>
+			<trans-unit id="ui.label" xml:space="preserve">
+				<source>Database Storage</source>
+			</trans-unit>
+			<trans-unit id="properties.identifier" xml:space="preserve">
+				<source>Table name</source>
+			</trans-unit>
+			<trans-unit id="properties.identifier.ui.help.message" xml:space="preserve">
+				<source>The name used to store all entered forms in. Items of the same table name will be grouped together. Could theoretically be used on multiple forms, but try not to do that, unless you know what you are doing :)</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>
