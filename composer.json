@@ -4,6 +4,7 @@
     "license": ["GPL-3.0-or-later"],
     "description": "This package adds the ability to store inputs of a form (or other input) into database and export the stored data as xlsx.",
     "require": {
+        "neos/neos": "^9.0",
         "neos/form": "^5.0 | ^6.0",
         "phpoffice/phpspreadsheet": "^1.2 || ^2.0 || ^3.0"
     },

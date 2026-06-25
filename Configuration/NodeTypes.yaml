@@ -7,20 +7,26 @@
 'Neos.Form.Builder:IdentifierMixin':
   abstract: true
 
-
 'Wegmeister.DatabaseStorage:DatabaseStorageFinisher':
   superTypes:
     'Neos.Form.Builder:AbstractFinisher': true
     'Neos.Form.Builder:IdentifierMixin': true
   ui:
     label: 'Database Storage Finisher'
-    icon: 'icon-database'
-    group: 'form.finisher'
+    icon: icon-database
+    group: form.finisher
   properties:
-    'identifier':
+    'storageIdentifier':
+      type: string
       ui:
+        label: 'Wegmeister.DatabaseStorage:Main:storage.storageIdentifier'
+        reloadIfChanged: true
         showInCreationDialog: true
         inspector:
-          group: 'finisher'
+          group: finisher
       validation:
-        'Neos.Neos/Validation/NotEmptyValidator': {  }
+        Neos.Neos/Validation/NotEmptyValidator: {  }
+        'Neos.Neos/Validation/StringLengthValidator':
+          maximum: 255
+        'Neos.Neos/Validation/RegularExpressionValidator':
+          regularExpression: '/^[a-z0-9\-]+$/i'

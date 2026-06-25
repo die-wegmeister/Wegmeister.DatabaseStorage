@@ -19,7 +19,6 @@ namespace Wegmeister\DatabaseStorage\Finishers;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Form\Core\Model\AbstractFinisher;
-use Neos\Form\Exception\FinisherException;
 use Neos\Media\Domain\Model\ResourceBasedInterface;
 
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
@@ -31,57 +30,45 @@ use Wegmeister\DatabaseStorage\Service\DatabaseStorageService;
  */
 class DatabaseStorageFinisher extends AbstractFinisher
 {
-    /**
-     * Instance of the database storage repository.
-     *
-     * @Flow\Inject
-     * @var DatabaseStorageRepository
-     */
-    protected $databaseStorageRepository;
+    #[Flow\Inject]
+    protected DatabaseStorageRepository $databaseStorageRepository;
 
-    /**
-     * @var DatabaseStorageService
-     */
-    protected $databaseStorageService;
+    #[Flow\Inject]
+    protected PersistenceManagerInterface $persistenceManager;
 
-    /**
-     * @Flow\Inject
-     * @var PersistenceManagerInterface
-     */
-    protected $persistenceManager;
+    #[Flow\Inject]
+    protected DatabaseStorageService $databaseStorageService;
 
     /**
      * Executes this finisher
      *
      * @see AbstractFinisher::execute()
-     *
-     * @return void
-     * @throws FinisherException
+     * @throws \Neos\Flow\Persistence\Exception\IllegalObjectTypeException
      */
-    protected function executeInternal()
+    protected function executeInternal(): void
     {
         $formRuntime = $this->finisherContext->getFormRuntime();
         $formValues = $formRuntime->getFormState()->getFormValues();
 
-        $identifier = $this->parseOption('identifier');
-        if ($identifier) {
-            $this->databaseStorageService = new DatabaseStorageService($identifier);
+        $storageIdentifier = $this->parseOption('storageIdentifier');
+        if ($storageIdentifier) {
+            $this->databaseStorageService = new DatabaseStorageService($storageIdentifier);
         } else {
-            $identifier = '__undefined__';
+            $storageIdentifier = '__undefined__';
         }
 
         foreach ($formValues as $formElementIdentifier => $formValue) {
             if ($formValue instanceof ResourceBasedInterface) {
                 $formValues[$formElementIdentifier] = $formValue->getResource();
             }
-            if ($identifier && $this->databaseStorageService->formElementIdentifierMustBeIgnoredInFinisher($formElementIdentifier)) {
+            if ($storageIdentifier && $this->databaseStorageService->formElementIdentifierMustBeIgnoredInFinisher($formElementIdentifier)) {
                 unset($formValues[$formElementIdentifier]);
             }
         }
 
         $dbStorage = new DatabaseStorage();
         $dbStorage
-            ->setStorageidentifier($identifier)
+            ->setStorageidentifier($storageIdentifier)
             ->setProperties($formValues)
             ->setDateTime(new \DateTime());
 

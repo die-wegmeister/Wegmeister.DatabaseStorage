@@ -29,18 +29,17 @@ use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 
-/**
- * @Flow\Scope("singleton")
- */
+#[Flow\Scope("singleton")]
 class DatabaseStorageRepository extends Repository
 {
     /**
      * Doctrine's Entity Manager.
-     *
-     * @Flow\Inject
-     * @var EntityManagerInterface
      */
-    protected $entityManager;
+    #[Flow\Inject]
+    protected EntityManagerInterface $entityManager;
+
+    #[Flow\Inject]
+    protected ResourceManager $resourceManager;
 
     /**
      * Update default orderings.
@@ -52,26 +51,12 @@ class DatabaseStorageRepository extends Repository
         'datetime' => QueryInterface::ORDER_DESCENDING
     ];
 
-    /**
-     * List of identifiers.
-     *
-     * @var ?array
-     */
-    protected $identifiers = null;
-
-    /**
-     * @Flow\Inject
-     * @var ResourceManager
-     */
-    protected $resourceManager;
-
+    protected ?array $identifiers = null;
 
     /**
      * Find all identifiers.
-     *
-     * @return mixed
      */
-    public function findStorageidentifiers()
+    public function findStorageidentifiers(): ?array
     {
         if ($this->identifiers === null) {
             $this->identifiers = $this->getStorageIdentifiers();
@@ -83,12 +68,8 @@ class DatabaseStorageRepository extends Repository
     /**
      * Delete all entries of a storage by its identifier and an optional date interval.
      *
-     * @param string $storageIdentifier Storage identifier
-     * @param \DateInterval|null $dateInterval Date interval
-     * @param bool $removeAttachedResource
-     * @return int
      * @throws IllegalObjectTypeException
-     * @throws InvalidQueryException
+     * @throws InvalidQueryException|\DateInvalidOperationException
      */
     public function deleteByStorageIdentifierAndDateInterval(
         string $storageIdentifier,
@@ -126,14 +107,14 @@ class DatabaseStorageRepository extends Repository
      *
      * @param object $object The object to remove
      * @param bool $removeAttachedResources Also remove all attached resources?
-     * @return void
+     *
      * @throws IllegalObjectTypeException
      * @api
      */
-    public function remove($entry, bool $removeAttachedResources = false): void
+    public function remove($object, bool $removeAttachedResources = false): void
     {
         if ($removeAttachedResources) {
-            foreach ($entry->getProperties() as $property) {
+            foreach ($object->getProperties() as $property) {
                 if (!$property instanceof PersistentResource) {
                     continue;
                 }
@@ -149,15 +130,12 @@ class DatabaseStorageRepository extends Repository
             }
         }
 
-        parent::remove($entry);
+        parent::remove($object);
     }
 
     /**
      * Get the list of all storage identifiers. Optionally exclude some.
      * For performance reasons, this method does not use the ORM.
-     *
-     * @param array $excludedIdentifiers
-     * @return array
      */
     public function getStorageIdentifiers(array $excludedIdentifiers = []): array
     {
@@ -179,9 +157,6 @@ class DatabaseStorageRepository extends Repository
 
     /**
      * Checks if there are entries for given storage identifier.
-     *
-     * @param string $storageIdentifier
-     * @return int
      */
     public function getAmountOfEntriesByStorageIdentifier(string $storageIdentifier): int
     {
@@ -203,7 +178,6 @@ class DatabaseStorageRepository extends Repository
      * @param string $storageIdentifier
      * @param int $limit
      * @param int $offset
-     * @return QueryResultInterface
      */
     public function findPaginatedByStorageidentifier(string $storageIdentifier, int $limit, int $offset): QueryResultInterface
     {

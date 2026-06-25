@@ -21,24 +21,20 @@ use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
 
 class DatabaseStorageAction extends AbstractAction
 {
-
-    /**
-     * @Flow\Inject
-     * @var DatabaseStorageRepository
-     */
-    protected $databaseStorageRepository;
+    #[Flow\Inject]
+    protected DatabaseStorageRepository $databaseStorageRepository;
 
     /**
      * @return ActionResponse|null
-     * @throws ActionException
+     * @throws \Neos\Flow\Persistence\Exception\IllegalObjectTypeException
      */
     public function perform(): ?ActionResponse
     {
-        $identifier = $this->options['identifier'];
+        $storageIdentifier = $this->options['storageIdentifier'];
         $formValues = $this->options['formValues'];
 
-        if (!$identifier) {
-            $identifier = '__undefined__';
+        if (!$storageIdentifier) {
+            $storageIdentifier = '__undefined__';
         }
 
         foreach ($formValues as $formElementIdentifier => $formValue) {
@@ -49,7 +45,7 @@ class DatabaseStorageAction extends AbstractAction
 
         $dbStorage = new DatabaseStorage();
         $dbStorage
-            ->setStorageidentifier($identifier)
+            ->setStorageidentifier($storageIdentifier)
             ->setProperties($formValues)
             ->setDateTime(new \DateTime());
 

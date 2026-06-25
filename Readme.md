@@ -37,7 +37,7 @@ finishers:
     options:
       # The identifier is used to group your data in the database.
       # You should avoid using the same identifier twice or your data could become a little messed up.
-      identifier: 'my-form-data'
+      storageIdentifier: 'my-form-data'
 ```
 
 ### Add DatabaseStorage using the Neos Form Builder
@@ -45,7 +45,7 @@ finishers:
 You can also use the DatabaseStorage with the [Neos.Form.Builder](https://github.com/neos/form-builder).
 You should be able to simply add DatabaseStorage as a finisher to your form.
 
-Don't forget to set a (unique) `identifier`!
+Don't forget to set a (unique) `storageIdentifier`!
 
 ### Add DatabaseStorage using a Fusion Form
 
@@ -56,7 +56,7 @@ Add the following configuration to your form action definition:
     databaseStorage {
         type = '\\Wegmeister\\DatabaseStorage\\FusionForm\\Runtime\\Action\\DatabaseStorageAction'
         options {
-            identifier = 'identifier-in-backend'
+            storageIdentifier = 'identifier-in-backend'
             formValues = ${data}
         }
     }

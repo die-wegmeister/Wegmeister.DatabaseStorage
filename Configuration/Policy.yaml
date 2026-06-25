@@ -1,62 +1,65 @@
 privilegeTargets:
-  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+  Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege:
     'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems':
-      matcher: 'method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->indexAction())'
+      matcher: method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->indexAction())
     'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer':
-      matcher: 'method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(index|show)Action())'
+      matcher: method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(index|show)Action())
     'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter':
-      matcher: 'method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(export)Action())'
+      matcher: method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(export)Action())
     'Wegmeister.DatabaseStorage:Backend.DatabaseStorageDeleter':
-      matcher: 'method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(delete|deleteAll)Action())'
-
+      matcher: method(Wegmeister\DatabaseStorage\Controller\DatabaseStorageController->(delete|deleteAll)Action())
 roles:
   'Wegmeister.DatabaseStorage:DatabaseStorageViewer':
-    label: Database Storage Viewer
-    description: User is allowed to view all database storage lists and their entries.
+    label: 'Database Storage Viewer'
+    description: 'User is allowed to view all database storage lists and their entries.'
     privileges:
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
         permission: GRANT
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
         permission: GRANT
-
   'Wegmeister.DatabaseStorage:DatabaseStorageExporter':
-    label: Database Storage Exporter
-    description: |
-      User is allowed to export all database storage lists.
-      Requires a role that can view the lists, otherwise only direct links to the export will work.
+    label: 'Database Storage Exporter'
+    description: "User is allowed to export all database storage lists.\nRequires a role that can view the lists, otherwise only direct links to the export will work.\n"
     privileges:
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
         permission: GRANT
-
   'Wegmeister.DatabaseStorage:DatabaseStorageDeleter':
-    label: Database Storage Deleter
-    description: |
-      User is allowed to delete all database storage lists or single entries.
-      Requires a role that can view the lists, otherwise only direct links to delete a list or an entry will work.
+    label: 'Database Storage Deleter'
+    description: "User is allowed to delete all database storage lists or single entries.\nRequires a role that can view the lists, otherwise only direct links to delete a list or an entry will work.\n"
     privileges:
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageDeleter'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageDeleter'
         permission: GRANT
-
   'Wegmeister.DatabaseStorage:DatabaseStorageAdmin':
-    label: Database Storage Admin
-    description: User is allowed to view, export and delete all database storage lists and their entries.
+    label: 'Database Storage Admin'
+    description: 'User is allowed to view, export and delete all database storage lists and their entries.'
     privileges:
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
         permission: GRANT
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
         permission: GRANT
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
         permission: GRANT
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageDeleter'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageDeleter'
         permission: GRANT
-
   'Neos.Neos:Administrator':
     privileges:
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
         permission: GRANT
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageViewer'
         permission: GRANT
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageExporter'
         permission: GRANT
-      - privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageDeleter'
+      -
+        privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.DatabaseStorageDeleter'
         permission: GRANT

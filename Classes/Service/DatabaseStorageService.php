@@ -13,86 +13,57 @@
 namespace Wegmeister\DatabaseStorage\Service;
 
 use Doctrine\ORM\EntityNotFoundException;
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-use Neos\ContentRepository\Domain\Service\ContextFactory;
-use Neos\Eel\FlowQuery\FlowQuery;
+use Neos\ContentRepository\Core\ContentRepository;
+use Neos\ContentRepository\Core\DimensionSpace\DimensionSpacePoint;
+use Neos\ContentRepository\Core\Feature\Security\Exception\AccessDenied;
+use Neos\ContentRepository\Core\NodeType\NodeTypeName;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindClosestNodeFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindDescendantNodesFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\NodeType\NodeTypeCriteria;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\PropertyValue\Criteria\PropertyValueEquals;
+use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
+use Neos\ContentRepository\Core\SharedModel\ContentRepository\ContentRepositoryId;
+use Neos\ContentRepository\Core\SharedModel\Node\PropertyName;
+use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
+use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Flow\Persistence\Exception\InvalidQueryException;
 use Neos\Flow\Persistence\QueryResultInterface;
 use Neos\Flow\ResourceManagement\PersistentResource;
 use Neos\Flow\ResourceManagement\ResourceManager;
-use Neos\Neos\Domain\Service\SiteService;
 use Wegmeister\DatabaseStorage\Domain\Model\DatabaseStorage;
 use Wegmeister\DatabaseStorage\Domain\Repository\DatabaseStorageRepository;
 
-/**
- * @Flow\Scope("singleton")
- */
+#[Flow\Scope("singleton")]
 class DatabaseStorageService
 {
-    /**
-     * @var DatabaseStorageRepository
-     * @Flow\Inject
-     */
-    protected $databaseStorageRepository;
+    #[Flow\Inject]
+    protected ContentRepositoryRegistry $contentRepositoryRegistry;
 
-    /**
-     * @var array
-     */
-    protected $formElementsNodeData;
+    #[Flow\Inject]
+    protected ResourceManager $resourceManager;
 
-    /**
-     * @var string
-     */
-    protected $formStorageIdentifier;
+    #[Flow\Inject]
+    protected DatabaseStorageRepository $databaseStorageRepository;
 
-    /**
-     * @var array
-     * @Flow\InjectConfiguration(path="nodeTypesIgnoredInFinisher", package="Wegmeister.DatabaseStorage")
-     */
-    protected $nodeTypesIgnoredInFinisher;
+    #[Flow\InjectConfiguration(path: "nodeTypesIgnoredInFinisher", package: "Wegmeister.DatabaseStorage")]
+    protected array $nodeTypesIgnoredInFinisher;
 
-    /**
-     * @var string
-     * @Flow\InjectConfiguration(path="listPrefix", package="Wegmeister.DatabaseStorage")
-     */
-    protected $listPrefix;
+    #[Flow\InjectConfiguration(path: "listPrefix", package: "Wegmeister.DatabaseStorage")]
+    protected string $listPrefix;
 
-    /**
-     * @var array
-     * @Flow\InjectConfiguration(path="nodeTypesIgnoredInExport", package="Wegmeister.DatabaseStorage")
-     */
-    protected $nodeTypesIgnoredInExport;
+    #[Flow\InjectConfiguration(path: "nodeTypesIgnoredInExport", package: "Wegmeister.DatabaseStorage")]
+    protected array $nodeTypesIgnoredInExport;
 
-    /**
-     * @var string
-     * @Flow\InjectConfiguration(path="datetimeFormat", package="Wegmeister.DatabaseStorage")
-     */
-    protected $datetimeFormat;
+    #[Flow\InjectConfiguration(path: "datetimeFormat", package: "Wegmeister.DatabaseStorage")]
+    protected string $datetimeFormat;
 
-    /**
-     * @var array
-     * @Flow\InjectConfiguration(path="contentDimensions", package="Neos.ContentRepository")
-     */
-    protected $contentDimensions;
+    protected array $formElementsNodeData = [];
 
-    /**
-     * @var array
-     */
-    protected $preparedDimensions;
+    protected string $formStorageIdentifier;
 
-    /**
-     * @Flow\Inject
-     * @var ContextFactory
-     */
-    protected $contextFactory;
-
-    /**
-     * @Flow\Inject
-     * @var ResourceManager
-     */
-    protected $resourceManager;
+    protected ?array $preparedDimensions = null;
 
     public function __construct(string $formStorageIdentifier = '')
     {
@@ -120,9 +91,6 @@ class DatabaseStorageService
      * - The Node identifier
      * - The speaking identifier of the FormElement
      * - The label of the FormElement
-     *
-     * @param string $identifier
-     * @return array|null
      */
     public function getFormElementDataByIdentifier(string $identifier): ?array
     {
@@ -147,35 +115,26 @@ class DatabaseStorageService
 
     /**
      * Prepare configured dimensions for easier iteration
-     * @return void
      */
-    protected function prepareDimensions(): void
+    protected function prepareDimensions(ContentRepository $contentRepository): void
     {
         if ($this->preparedDimensions !== null) {
             // Dimensions are already prepared
             return;
         }
 
-        if (empty($this->contentDimensions)) {
+        $contentDimensions = $contentRepository->getContentDimensionSource()->getContentDimensionsOrderedByPriority();
+        if (empty($contentDimensions)) {
             // No dimensions configured
             $this->preparedDimensions = [];
             return;
         }
 
         $preparedDimensions = [];
-        foreach ($this->contentDimensions as $identifier => $dimension) {
-            // Move default preset to first position
-            $dimensionPresets = array_merge(
-                [$dimension['default'] => $dimension['presets'][$dimension['default']]],
-                $dimension['presets'],
-            );
-
-            $preparedDimensions[$identifier] = [];
-            foreach ($dimensionPresets as $targetDimension => $preset) {
-                $preparedDimensions[$identifier][] = [
-                    'dimensions' => $preset['values'],
-                    'targetDimensions' => $targetDimension,
-                ];
+        foreach ($contentDimensions as $contentDimension) {
+            $preparedDimensions[$contentDimension->id->value] = [];
+            foreach ($contentDimension->values as $contentDimensionValue) {
+                $preparedDimensions[$contentDimension->id->value][] = $contentDimensionValue->value;
             }
         }
 
@@ -188,8 +147,6 @@ class DatabaseStorageService
      *
      * @param array $inputArray The multidimensional array of the dimensions
      * @param array $keys The keys of the dimensions
-     *
-     * @return array
      */
     protected function createDimensionCombinations(array $inputArray, array $combinations = []): array
     {
@@ -203,7 +160,7 @@ class DatabaseStorageService
         unset($inputArray[$dimensionKey]);
 
         foreach ($dimensionValues as $dimensionValue) {
-            // Add the current dimansion and its value to the combinations
+            // Add the current dimension and its value to the combinations
             $combinations[$dimensionKey] = $dimensionValue;
 
             if (empty($inputArray)) {
@@ -222,9 +179,8 @@ class DatabaseStorageService
      * If the Node-based form is still available, node data such as the "speaking" identifier, the label
      * are looked up to provide the best possible label and value matching for the export.
      *
-     * @return array|null
-     * @throws \Neos\ContentRepository\Exception\NodeException
      * @throws \Neos\Eel\Exception
+     * @throws AccessDenied
      */
     protected function getFormElementsNodeData(?array $dimensions = []): ?array
     {
@@ -233,39 +189,26 @@ class DatabaseStorageService
             return $this->formElementsNodeData;
         }
 
-        $this->prepareDimensions();
+        $contentRepository = $this->contentRepositoryRegistry->get(ContentRepositoryId::fromString('default'));
+        $this->prepareDimensions($contentRepository);
         if (empty($dimensions)) {
             $dimensions = reset($this->preparedDimensions);
         }
 
-        $contextProperties = [
-            'workspaceName' => 'live',
-            'invisibleContentShown' => true,
-            'removedContentShown' => true,
-            'inaccessibleContentShown' => false,
-        ];
-
-        if (!empty($dimensions)) {
-            $contextProperties['dimensions'] = [];
-            $contextProperties['targetDimensions'] = [];
-
-            foreach ($dimensions as $dimension => $dimensionPreset) {
-                $contextProperties['dimensions'][$dimension] = $dimensionPreset['dimensions'];
-                $contextProperties['targetDimensions'][$dimension] = $dimensionPreset['targetDimensions'];
-            }
-        }
-
-        $context = $this->contextFactory->create(
-            $contextProperties
+        $contentGraph =  $contentRepository->getContentGraph(WorkspaceName::forLive());
+        $sitesRootNodeNode = $contentGraph->findRootNodeAggregateByType(NodeTypeName::fromString('Neos.Neos:Sites'));
+        $contentSubgraph = $contentGraph->getSubgraph(
+            DimensionSpacePoint::fromArray($dimensions), VisibilityConstraints::createEmpty()
+        );
+        $finisherNodes = $contentSubgraph->findDescendantNodes(
+            $sitesRootNodeNode->nodeAggregateId,
+            FindDescendantNodesFilter::create(
+                nodeTypes: NodeTypeCriteria::fromFilterString('Wegmeister.DatabaseStorage:DatabaseStorageFinisher'),
+                propertyValue: PropertyValueEquals::create(PropertyName::fromString('storageIdentifier'), $this->formStorageIdentifier, true)
+            )
         );
 
-        // Find the finisher belonging to the formStorageIdentifier
-        $q = new FlowQuery([$context->getNode(SiteService::SITES_ROOT_PATH)]);
-        $finisherNodes = $q->find(
-            "[instanceof Wegmeister.DatabaseStorage:DatabaseStorageFinisher][identifier='" . $this->formStorageIdentifier . "']"
-        )->get();
-
-        if (count($finisherNodes) !== 1) {
+        if ($finisherNodes->count() !== 1) {
             // None or more than one Finisher with the same identifier --> could be a Fusion or YAML form or ambiguous --> return
             $nextDimensions = next($this->preparedDimensions);
 
@@ -277,40 +220,45 @@ class DatabaseStorageService
         }
 
         // Find the NodeBasedForm owning the Finisher
-        $q = new FlowQuery([$finisherNodes[0]]);
-        $formNode = $q->parents('[instanceof Neos.Form.Builder:NodeBasedForm]')->get(0);
-        if (!$formNode instanceof NodeInterface) {
+        $formNode = $contentSubgraph->findClosestNode(
+            $finisherNodes->first()->aggregateId,
+            FindClosestNodeFilter::create(NodeTypeCriteria::fromFilterString('Neos.Form.Builder:NodeBasedForm'))
+        );
+
+        if (!$formNode instanceof \Neos\ContentRepository\Core\Projection\ContentGraph\Node) {
             // No NodeBasedForm found, return
             $nextDimensions = next($this->preparedDimensions);
 
             if ($nextDimensions !== false) {
                 return $this->getFormElementsNodeData($nextDimensions);
             }
-
             return null;
         }
 
         // Find all FormElements belonging to the Form
-        $q = new FlowQuery([$formNode]);
-        $formElements = $q->find('[instanceof Neos.Form.Builder:FormElement]')->get();
+        $formElements = $contentSubgraph->findDescendantNodes(
+            $formNode->aggregateId,
+            FindDescendantNodesFilter::create(
+                nodeTypes: NodeTypeCriteria::fromFilterString('Neos.Form.Builder:FormElement')
+            )
+        );
 
-        if (empty($formElements)) {
+        if ($formElements->isEmpty()) {
             // No FormElements found, return
             $nextDimensions = next($this->preparedDimensions);
 
             if ($nextDimensions !== false) {
                 return $this->getFormElementsNodeData($nextDimensions);
             }
-
             return null;
         }
 
         $mapping = [];
 
-        /** @var NodeInterface $formElement */
+        /** @var \Neos\ContentRepository\Core\Projection\ContentGraph\Node $formElement */
         foreach ($formElements as $formElement) {
             // UUID of the FormElement node
-            $nodeIdentifier = (string)$formElement->getNodeAggregateIdentifier();
+            $nodeIdentifier = $formElement->aggregateId->value;
             // Given identifier of the FormElement
             $speakingIdentifier = $formElement->getProperty('identifier');
             // Label of the FormElement
@@ -319,7 +267,7 @@ class DatabaseStorageService
             $displayLabel = $label ?: $speakingIdentifier ?: $nodeIdentifier;
 
             $mapping[] = [
-                'nodeTypeName' => $formElement->getNodeType()->getName(),
+                'nodeTypeName' => $formElement->nodeTypeName->value,
                 'nodeIdentifier' => $nodeIdentifier,
                 'speakingIdentifier' => $speakingIdentifier,
                 'label' => $label,
@@ -333,9 +281,6 @@ class DatabaseStorageService
 
     /**
      * Get field labels of all entries to allow exporting all fields added/removed/changed over time
-     *
-     * @param QueryResultInterface $entries
-     * @return array
      */
     public function getFormElementLabels(QueryResultInterface $entries): array
     {
@@ -373,10 +318,6 @@ class DatabaseStorageService
     /**
      * We check the given entry if there is a value for the given display label
      * The check is performed against the key, the nodeIdentifier and the speakingIdentifier
-     *
-     * @param DatabaseStorage $entry
-     * @param string $formElementLabel
-     * @return string
      */
     public function getValueFromEntryProperty(DatabaseStorage $entry, string $formElementLabel): string
     {
@@ -412,8 +353,6 @@ class DatabaseStorageService
      *
      * @param mixed $value The database column value.
      * @param int $indent The level of indentation (for array values).
-     *
-     * @return string
      */
     protected function getStringValue($value, int $indent = 0): string
     {
@@ -469,9 +408,6 @@ class DatabaseStorageService
 
     /**
      * Checks if there are entries for given storage identifier.
-     *
-     * @param string $storageIdentifier
-     * @return int
      */
     public function getAmountOfEntriesByStorageIdentifier(string $storageIdentifier): int
     {
@@ -480,11 +416,6 @@ class DatabaseStorageService
 
     /**
      * Deletes entries of a storage by its identifier and an optional date interval.
-     *
-     * @param string $storageIdentifier Storage identifier
-     * @param \DateInterval $dateInterval Date interval
-     * @param bool $removeFiles
-     * @return int
      */
     public function cleanupByStorageIdentifierAndDateInterval(string $storageIdentifier, \DateInterval $dateInterval, bool $removeFiles = false): int
     {
@@ -496,10 +427,7 @@ class DatabaseStorageService
     }
 
     /**
-     * Get a list of all storage identifiers.
-     *
-     * @param array $excludedStorageIdentifiers
-     * @return array
+     * Get a list of all storage identifiers
      */
     public function getListOfStorageIdentifiers(array $excludedStorageIdentifiers = []): array
     {

@@ -17,9 +17,7 @@ namespace Wegmeister\DatabaseStorage\Domain\Model;
 use Neos\Flow\Annotations as Flow;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @Flow\Entity
- */
+#[Flow\Entity]
 class DatabaseStorage
 {
 
@@ -42,77 +40,38 @@ class DatabaseStorage
     protected $properties = [];
 
     /**
-     * DateTime the entry was created.
-     *
-     * @var \DateTime
      * @Flow\Validate(type="NotEmpty")
      */
-    protected $datetime;
+    protected \DateTime $datetime;
 
-    /**
-     * Get identifier
-     *
-     * @return string
-     */
-    public function getStorageidentifier()
+    public function getStorageidentifier(): string
     {
         return $this->storageidentifier;
     }
 
-    /**
-     * Set the identifier
-     *
-     * @param string $identifier The identifier for the entry.
-     *
-     * @return DatabaseStorage
-     */
-    public function setStorageidentifier(string $identifier)
+    public function setStorageidentifier(string $storageIdentifier): DatabaseStorage
     {
-        $this->storageidentifier = $identifier;
+        $this->storageidentifier = $storageIdentifier;
         return $this;
     }
 
-    /**
-     * Get properties
-     *
-     * @return array
-     */
-    public function getProperties()
+    public function getProperties(): array
     {
         return $this->properties;
     }
 
-    /**
-     * Set properties
-     *
-     * @param array $properties Array of the properties.
-     *
-     * @return DatabaseStorage
-     */
-    public function setProperties(array $properties)
+    public function setProperties(array $properties): DatabaseStorage
     {
         $this->properties = $properties;
         return $this;
     }
 
-    /**
-     * Get datetime
-     *
-     * @return \DateTime
-     */
-    public function getDateTime()
+    public function getDateTime(): \DateTime
     {
         return $this->datetime;
     }
 
-    /**
-     * Set datetime
-     *
-     * @param \DateTime $datetime
-     *
-     * @return DatabaseStorage
-     */
-    public function setDateTime(\DateTime $datetime)
+    public function setDateTime(\DateTime $datetime): DatabaseStorage
     {
         $this->datetime = $datetime;
         return $this;

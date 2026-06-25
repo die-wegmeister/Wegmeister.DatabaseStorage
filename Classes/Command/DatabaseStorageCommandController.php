@@ -8,21 +8,13 @@ use Wegmeister\DatabaseStorage\Service\DatabaseStorageService;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
 
-/**
- * @Flow\Scope("singleton")
- */
+#[Flow\Scope("singleton")]
 class DatabaseStorageCommandController extends CommandController
 {
-    /**
-     * @var DatabaseStorageService
-     * @Flow\Inject
-     */
+    #[Flow\Inject]
     protected DatabaseStorageService $databaseStorageService;
 
-    /**
-     * @Flow\InjectConfiguration(package="Wegmeister.DatabaseStorage", path="cleanup")
-     * @var array|null
-     */
+    #[Flow\InjectConfiguration(path: "cleanup", package: "Wegmeister.DatabaseStorage")]
     protected ?array $storageCleanupConfiguration;
 
     /**
@@ -47,12 +39,8 @@ class DatabaseStorageCommandController extends CommandController
     /**
      * Deletes entries of all storages older than given date interval.
      * You can also skip the configured storages.
-     *
-     * @param string $dateInterval
-     * @param bool $removeFiles
-     * @param bool $includeConfiguredStorages
      */
-    public function cleanupAllStoragesCommand(string $dateInterval, $removeFiles = false, bool $includeConfiguredStorages = false): void
+    public function cleanupAllStoragesCommand(string $dateInterval, bool $removeFiles = false, bool $includeConfiguredStorages = false): void
     {
         $this->outputFormatted('<b>Cleanup of all storages</b>');
         $this->outputLine('');
@@ -89,11 +77,6 @@ class DatabaseStorageCommandController extends CommandController
     /**
      * Get the cleanup results for the given storage identifiers.
      * If no date interval is provided, the cleanup configuration will be used.
-     *
-     * @param array $storageIdentifiers
-     * @param DateInterval|null $dateInterval
-     * @param int $daysToKeepData
-     * @return array
      */
     protected function getCleanupResultsForStorageIdentifier(array $storageIdentifiers, ?DateInterval $dateInterval = null, int $daysToKeepData = -1, $removeFiles = false): array
     {
@@ -139,9 +122,6 @@ class DatabaseStorageCommandController extends CommandController
 
     /**
      * Get the date interval from the configuration and ensure it is valid.
-     *
-     * @param string $storageIdentifier
-     * @return DateInterval
      */
     protected function getDateIntervalFromConfiguration(string $storageIdentifier): DateInterval
     {
@@ -168,9 +148,6 @@ class DatabaseStorageCommandController extends CommandController
 
     /**
      * Get the amount of days to keep from the configured date interval
-     *
-     * @param DateInterval $dateInterval
-     * @return int
      */
     protected function getDaysToKeepFromConfiguredInterval(DateInterval $dateInterval): int
     {

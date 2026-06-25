@@ -29,9 +29,8 @@ use Wegmeister\DatabaseStorage\Service\DatabaseStorageService;
 
 /**
  * The Database Storage controller
- *
- * @Flow\Scope("singleton")
  */
+#[Flow\Scope("singleton")]
 class DatabaseStorageController extends ActionController
 {
     /**
@@ -62,52 +61,18 @@ class DatabaseStorageController extends ActionController
         ],
     ];
 
-    /**
-     * Instance of the database storage repository.
-     *
-     * @Flow\Inject
-     * @var DatabaseStorageRepository
-     */
-    protected $databaseStorageRepository;
+    #[Flow\Inject]
+    protected DatabaseStorageRepository $databaseStorageRepository;
 
-    /**
-     * @var DatabaseStorageService
-     */
-    protected $databaseStorageService;
+    #[Flow\Inject]
+    protected Translator $translator;
 
-    /**
-     * Instance of the translator interface.
-     *
-     * @Flow\Inject
-     * @var Translator
-     */
-    protected $translator;
-
-    /**
-     * Settings of this plugin.
-     *
-     * @var array
-     */
-    protected $settings;
-
-    /**
-     * Inject the settings
-     *
-     * @param array $settings The settings to inject.
-     *
-     * @return void
-     */
-    public function injectSettings(array $settings)
-    {
-        $this->settings = $settings;
-    }
+    protected DatabaseStorageService $databaseStorageService;
 
     /**
      * Show list of identifiers
-     *
-     * @return void
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->view->assign('identifiers', $this->databaseStorageRepository->findStorageidentifiers());
     }
@@ -117,10 +82,8 @@ class DatabaseStorageController extends ActionController
      *
      * @param string $identifier The storage identifier.
      * @param int $currentPage
-     * @return void
-     * @throws StopActionException
      */
-    public function showAction(string $identifier, int $currentPage = 1)
+    public function showAction(string $identifier, int $currentPage = 1): void
     {
         $itemsPerPage = (int)($this->settings['itemsPerPage'] ?? 10);
         $offset = ($currentPage - 1) * $itemsPerPage;
@@ -173,15 +136,9 @@ class DatabaseStorageController extends ActionController
 
     /**
      * Delete an entry from the list of identifiers.
-     *
-     * @param DatabaseStorage $entry The DatabaseStorage entry
-     *
-     * @return void
      */
-    public function deleteAction(
-        DatabaseStorage $entry,
-        bool $removeAttachedResources = false
-    ) {
+    public function deleteAction(DatabaseStorage $entry, bool $removeAttachedResources = false): void
+    {
         $identifier = $entry->getStorageidentifier();
         $this->databaseStorageRepository->remove($entry, $removeAttachedResources);
         $this->addFlashMessage(
@@ -202,11 +159,9 @@ class DatabaseStorageController extends ActionController
      *
      * @param string $identifier The storage identifier for the entries to be removed.
      * @param bool $redirect Redirect to index?
-     * @param bool $removeAttachedResource Remove attached resources?
-     *
-     * @return void
+     * @param bool $removeAttachedResources Remove attached resources?
      */
-    public function deleteAllAction(string $identifier, bool $redirect = false, bool $removeAttachedResources = false)
+    public function deleteAllAction(string $identifier, bool $redirect = false, bool $removeAttachedResources = false): void
     {
         $count = $this->databaseStorageRepository->deleteByStorageIdentifierAndDateInterval(
             $identifier,
@@ -239,10 +194,8 @@ class DatabaseStorageController extends ActionController
      * @param string $identifier The storage identifier that should be exported.
      * @param string $writerType The writer type/export format to be used.
      * @param bool $exportDateTime Should the datetime be exported?
-     *
-     * @return void
      */
-    public function exportAction(string $identifier, string $writerType = 'Xlsx', bool $exportDateTime = false)
+    public function exportAction(string $identifier, string $writerType = 'Xlsx', bool $exportDateTime = false): void
     {
         if (!isset(self::$types[$writerType])) {
             throw new WriterException('No writer available for type ' . $writerType . '.', 1521787983);

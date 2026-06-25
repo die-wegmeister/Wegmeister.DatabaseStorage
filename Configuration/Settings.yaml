@@ -9,7 +9,7 @@ Neos:
   Neos:
     fusion:
       autoInclude:
-        'Wegmeister.DatabaseStorage': true
+        Wegmeister.DatabaseStorage: true
     modules:
       databaseStorage:
         label: 'Wegmeister.DatabaseStorage:Main:storage.databaseStorage'
@@ -17,13 +17,11 @@ Neos:
         description: 'Wegmeister.DatabaseStorage:Main:storage.databaseStorageDescription'
         icon: icon-database
         privilegeTarget: 'Wegmeister.DatabaseStorage:Backend.ListDatabaseStorageItems'
-
     userInterface:
       translation:
         autoInclude:
-          'Wegmeister.DatabaseStorage':
-            - 'Main'
-
+          Wegmeister.DatabaseStorage:
+            - Main
 Wegmeister:
   DatabaseStorage:
     creator: 'die wegmeister gmbh'

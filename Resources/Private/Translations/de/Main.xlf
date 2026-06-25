@@ -35,7 +35,7 @@
 			</trans-unit>
 
 			<!-- Index -->
-			<trans-unit id="storage.identifier" xml:space="preserve">
+			<trans-unit id="storage.storageIdentifier" xml:space="preserve">
 				<source>Identifier</source>
 				<target>ID</target>
 			</trans-unit>

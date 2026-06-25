@@ -28,7 +28,7 @@
 			</trans-unit>
 
 			<!-- Index page -->
-			<trans-unit id="storage.identifier" xml:space="preserve">
+			<trans-unit id="storage.storageIdentifier" xml:space="preserve">
 				<source>Identifier</source>
 			</trans-unit>
 			<trans-unit id="storage.export" xml:space="preserve">
